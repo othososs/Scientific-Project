@@ -1,55 +1,64 @@
-Option Explicit
+Sub RechercherValeurs()
 
-Sub RecupererValeurs()
-
-    Dim wbSource As Workbook
     Dim wsSource As Worksheet
-    Dim wsDestination As Worksheet
-    Dim cheminDossier As String
-    Dim fichier As String
-    Dim dateChoisie As Date
-    Dim dernierLigneSource As Long
-    Dim i As Long
+    Dim wsDest As Worksheet
+    Dim sourcePath As String
+    Dim sourceFile As String
+    Dim currentDate As String
+    Dim lastRowSource As Long
+    Dim lastRowDest As Long
+    Dim i As Long, j As Long
+    Dim found As Boolean
     
-    ' Définir le dossier source
-    cheminDossier = "V:\Dossier\ABC\"
+    ' Spécifiez le chemin du répertoire source
+    sourcePath = "C:\Votre\Chemin\Vers\Les\Fichiers\"
     
-    ' Sélectionner la date
-    dateChoisie = Application.InputBox("Choisissez une date", Type:=1)
+    ' Obtenez la date actuelle au format YYYYMMDD
+    currentDate = Format(Date, "YYYYMMDD")
     
-    ' Construire le nom du fichier en fonction de la date choisie
-    fichier = "Cokpit_BASE" & Format(dateChoisie, "yyyymmdd") & ".xlsx"
+    ' Spécifiez le nom du fichier source en fonction de la date
+    sourceFile = "Cokpit_BASE" & currentDate & ".xlsx"
     
-    ' Ouvrir le fichier source
-    Set wbSource = Workbooks.Open(cheminDossier & fichier)
-    Set wsSource = wbSource.Sheets(1) ' Supposons que les données sont dans la première feuille
+    ' Définissez la feuille de calcul source
+    Set wsSource = Workbooks.Open(sourcePath & sourceFile).Worksheets(1)
     
-    ' Référence à la feuille de destination (où se trouve le tableau avec Titre, Valeur, Source)
-    Set wsDestination = ThisWorkbook.Sheets("Feuille1") ' Remplace "Feuille1" par le nom réel de ta feuille
+    ' Définissez la feuille de calcul de destination (le fichier où vous avez votre tableau)
+    Set wsDest = ThisWorkbook.Worksheets("NomDeVotreFeuille")
     
-    ' Trouver la dernière ligne avec des données dans la feuille source
-    dernierLigneSource = wsDestination.Cells(wsDestination.Rows.Count, "A").End(xlUp).Row
+    ' Trouvez la dernière ligne avec des données dans la feuille source
+    lastRowSource = wsSource.Cells(wsSource.Rows.Count, "C").End(xlUp).Row
     
-    ' Parcourir les lignes du tableau dans la feuille destination
-    For i = 2 To dernierLigneSource ' On suppose que la première ligne contient des en-têtes
+    ' Trouvez la dernière ligne avec des données dans la feuille de destination
+    lastRowDest = wsDest.Cells(wsDest.Rows.Count, "B").End(xlUp).Row
+    
+    ' Bouclez à travers chaque ligne dans la feuille de destination
+    For i = 2 To lastRowDest ' Assurez-vous que la première ligne contient des en-têtes
         
-        ' Trouver la valeur correspondante dans le fichier source
-        Dim titre As String
-        Dim valeur As Variant
+        ' Réinitialisez le marqueur de "trouvé" pour chaque itération
+        found = False
         
-        titre = wsDestination.Cells(i, 1).Value ' Colonne A
-        valeur = Application.VLookup(titre, wsSource.Range("C:G"), 4, False) ' Colonne G
+        ' Bouclez à travers chaque ligne dans la feuille source
+        For j = 2 To lastRowSource ' Assurez-vous que la première ligne contient des en-têtes
+            
+            ' Vérifiez si le titre de la feuille de destination correspond au titre de la feuille source
+            If wsDest.Cells(i, 2).Value = wsSource.Cells(j, 3).Value Then
+                
+                ' Copiez la valeur correspondante de la colonne G de la feuille source
+                wsDest.Cells(i, 3).Value = wsSource.Cells(j, 7).Value
+                
+                ' Marquez comme "trouvé"
+                found = True
+                
+                ' Sortez de la boucle interne une fois que la correspondance est trouvée
+                Exit For
+            End If
+        Next j
         
-        ' Mettre à jour la valeur dans la feuille destination
-        If Not IsError(valeur) Then
-            wsDestination.Cells(i, 2).Value = valeur
-        Else
-            wsDestination.Cells(i, 2).Value = "Non trouvé"
-        End If
+        ' Si la correspondance n'est pas trouvée, vous pouvez ajouter un traitement supplémentaire ici si nécessaire
         
     Next i
     
-    ' Fermer le fichier source
-    wbSource.Close SaveChanges:=False
-
+    ' Fermez le classeur source
+    Workbooks(sourceFile).Close SaveChanges:=False
+    
 End Sub
