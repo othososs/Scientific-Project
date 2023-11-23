@@ -7,6 +7,7 @@ Sub RemplirFichierDestination()
     Dim colTitreDest As Long
     Dim colTitreSource As Long
     Dim i As Long, lastRowDest As Long
+    Dim fichierSource As String
 
     ' Définir la feuille de destination
     Set wsDest = ThisWorkbook.Sheets("FeuilleDestination")
@@ -19,28 +20,34 @@ Sub RemplirFichierDestination()
         ' Récupérer la date cible
         dateCible = wsDest.Cells(1, i).Value
 
-        ' Ouvrir le fichier source correspondant
-        Set wsSource = Workbooks.Open("Cokpit_BASE" & Format(dateCible, "yyyymmdd") & ".xlsx").Sheets(1)
+        ' Générer le nom du fichier source basé sur la date
+        fichierSource = "Cokpit_BASE" & Format(dateCible, "yyyymmdd") & ".xlsx"
 
-        ' Trouver la colonne correspondante au titre du cockpit dans le fichier source
-        colTitreSource = Application.Match("Titre cockpit", wsSource.Rows(1), 0)
+        ' Vérifier si le fichier source existe
+        If Dir(fichierSource) <> "" Then
+            ' Ouvrir le fichier source correspondant
+            Set wsSource = Workbooks.Open(fichierSource).Sheets(1)
 
-        ' Boucler à travers les lignes dans le fichier de destination
-        For j = 2 To lastRowDest
-            ' Récupérer le titre du cockpit à partir du fichier de destination
-            titreCokpit = wsDest.Cells(j, 2).Value
+            ' Trouver la colonne correspondante au titre du cockpit dans le fichier source
+            colTitreSource = Application.Match("Titre cockpit", wsSource.Rows(1), 0)
 
-            ' Trouver la ligne correspondante au titre dans le fichier source
-            ligneTitreSource = Application.Match(titreCokpit, wsSource.Range(wsSource.Cells(1, colTitreSource), wsSource.Cells(wsSource.Rows.Count, colTitreSource).End(xlUp)), 0)
+            ' Boucler à travers les lignes dans le fichier de destination
+            For j = 2 To lastRowDest
+                ' Récupérer le titre du cockpit à partir du fichier de destination
+                titreCokpit = wsDest.Cells(j, 2).Value
 
-            ' Copier la valeur du cockpit dans le fichier destination
-            If Not IsError(ligneTitreSource) Then
-                valeurCokpit = wsSource.Cells(ligneTitreSource, colTitreSource + 5).Value ' Colonne G dans l'exemple
-                wsDest.Cells(j, i).Value = valeurCokpit
-            End If
-        Next j
+                ' Trouver la ligne correspondante au titre dans le fichier source
+                ligneTitreSource = Application.Match(titreCokpit, wsSource.Range(wsSource.Cells(1, colTitreSource), wsSource.Cells(wsSource.Rows.Count, colTitreSource).End(xlUp)), 0)
 
-        ' Fermer le fichier source
-        wsSource.Parent.Close SaveChanges:=False
+                ' Copier la valeur du cockpit dans le fichier destination
+                If Not IsError(ligneTitreSource) Then
+                    valeurCokpit = wsSource.Cells(ligneTitreSource, colTitreSource + 5).Value ' Colonne G dans l'exemple
+                    wsDest.Cells(j, i).Value = valeurCokpit
+                End If
+            Next j
+
+            ' Fermer le fichier source
+            wsSource.Parent.Close SaveChanges:=False
+        End If
     Next i
 End Sub
