@@ -1,57 +1,58 @@
-Sub RemplirFichierDestination()
-    Dim wsDest As Worksheet
+Sub MettreAJourFichierDestination()
+    Dim wbDestination As Workbook
+    Dim wsDestination As Worksheet
+    Dim wbSource As Workbook
     Dim wsSource As Worksheet
-    Dim dateCible As Date
-    Dim titreCokpit As String
-    Dim valeurCokpit As Variant
-    Dim colTitreSource As Long
-    Dim i As Long, j As Long, lastRowDest As Long
-    Dim cheminRepertoire As String
-    Dim fichierSource As String
-    Dim ligneTitreSource As Variant
-
-    ' Spécifiez le chemin complet du répertoire où se trouvent vos fichiers source
-    cheminRepertoire = "C:\Votre\Chemin\Repertoire\"
-
-    ' Définir la feuille de destination
-    Set wsDest = ThisWorkbook.Sheets("FeuilleDestination")
-
-    ' Déterminer la dernière ligne dans la feuille de destination
-    lastRowDest = wsDest.Cells(wsDest.Rows.Count, 1).End(xlUp).Row
-
-    ' Boucler à travers les colonnes de dates dans la première ligne du tableau de destination
-    For i = 4 To wsDest.Cells(1, wsDest.Columns.Count).End(xlToLeft).Column
-        ' Récupérer la date cible
-        dateCible = wsDest.Cells(1, i).Value
-
-        ' Générer le nom du fichier source basé sur la date
-        fichierSource = cheminRepertoire & "Cokpit_BASE" & Format(dateCible, "yyyymmdd") & ".xlsx"
-
-        ' Vérifier si le fichier source existe
-        If Dir(fichierSource) <> "" Then
-            ' Ouvrir le fichier source correspondant
-            Set wsSource = Workbooks.Open(fichierSource).Sheets(1)
-
-            ' Trouver la colonne correspondante au titre du cockpit dans le fichier source
-            colTitreSource = Application.Match("Titre cockpit", wsSource.Rows(1), 0)
-
-            ' Boucler à travers les lignes dans le fichier de destination
-            For j = 2 To lastRowDest
-                ' Récupérer le titre du cockpit à partir du fichier de destination
-                titreCokpit = wsDest.Cells(j, 2).Value
-
-                ' Trouver la ligne correspondante au titre dans le fichier source
-                ligneTitreSource = Application.Match(titreCokpit, wsSource.Columns("C"), 0)
-
-                ' Copier la valeur du cockpit dans le fichier destination
-                If Not IsError(ligneTitreSource) Then
-                    valeurCokpit = wsSource.Cells(ligneTitreSource, colTitreSource + 5).Value ' Colonne G dans l'exemple
-                    wsDest.Cells(j, i).Value = valeurCokpit
+    Dim cell As Range
+    Dim dateCell As Range
+    Dim sourceDateCell As Range
+    Dim sourceFilePath As String
+    Dim sourceFileName As String
+    Dim destinationDate As Date
+    Dim sourceDate As Date
+    Dim matchRow As Long
+    
+    ' Ouvrir le fichier destination
+    Set wbDestination = Workbooks.Open("chemin_vers_votre_fichier_destination.xlsx")
+    ' Remplacez "Feuil1" par le nom de votre feuille de destination
+    Set wsDestination = wbDestination.Sheets("Feuil1")
+    
+    ' Parcourir les dates dans les colonnes E à Z de la feuille de destination
+    For Each dateCell In wsDestination.Range("E1:Z1")
+        destinationDate = dateCell.Value
+        
+        ' Construire le nom du fichier source en fonction de la date
+        sourceFileName = "Cokpit_BASE" & Format(destinationDate, "YYYYMMDD")
+        ' Construire le chemin complet du fichier source
+        sourceFilePath = "chemin_vers_votre_repertoire_source\" & sourceFileName & ".xlsx"
+        
+        ' Ouvrir le fichier source
+        Set wbSource = Workbooks.Open(sourceFilePath)
+        ' Remplacez "Feuil1" par le nom de votre feuille source
+        Set wsSource = wbSource.Sheets("Feuil1")
+        
+        ' Parcourir les valeurs de colonne C dans le fichier destination
+        For Each cell In wsDestination.Range("C2:C" & wsDestination.Cells(wsDestination.Rows.Count, "C").End(xlUp).Row)
+            ' Récupérer la date correspondante dans la ligne actuelle
+            sourceDate = wsSource.Cells(cell.Row, 5).Value
+            
+            ' Comparer les dates
+            If destinationDate = sourceDate Then
+                ' Trouver la ligne correspondante dans le fichier source
+                matchRow = Application.Match(cell.Value, wsSource.Range("C:C"), 0)
+                
+                ' Vérifier si une correspondance a été trouvée
+                If Not IsError(matchRow) Then
+                    ' Récupérer la valeur de la colonne G dans le fichier source
+                    wsDestination.Cells(cell.Row, dateCell.Column).Value = wsSource.Cells(matchRow, 7).Value
                 End If
-            Next j
-
-            ' Fermer le fichier source
-            wsSource.Parent.Close SaveChanges:=False
-        End If
-    Next i
+            End If
+        Next cell
+        
+        ' Fermer le fichier source
+        wbSource.Close SaveChanges:=False
+    Next dateCell
+    
+    ' Fermer le fichier destination
+    wbDestination.Close SaveChanges:=True
 End Sub
