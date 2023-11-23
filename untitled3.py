@@ -1,64 +1,21 @@
-Sub RechercherValeurs()
 
-    Dim wsSource As Worksheet
-    Dim wsDest As Worksheet
-    Dim sourcePath As String
-    Dim sourceFile As String
-    Dim currentDate As String
-    Dim lastRowSource As Long
-    Dim lastRowDest As Long
-    Dim i As Long, j As Long
-    Dim found As Boolean
-    
-    ' Spécifiez le chemin du répertoire source
-    sourcePath = "C:\Votre\Chemin\Vers\Les\Fichiers\"
-    
-    ' Obtenez la date actuelle au format YYYYMMDD
-    currentDate = Format(Date, "YYYYMMDD")
-    
-    ' Spécifiez le nom du fichier source en fonction de la date
-    sourceFile = "Cokpit_BASE" & currentDate & ".xlsx"
-    
-    ' Définissez la feuille de calcul source
-    Set wsSource = Workbooks.Open(sourcePath & sourceFile).Worksheets(1)
-    
-    ' Définissez la feuille de calcul de destination (le fichier où vous avez votre tableau)
-    Set wsDest = ThisWorkbook.Worksheets("NomDeVotreFeuille")
-    
-    ' Trouvez la dernière ligne avec des données dans la feuille source
-    lastRowSource = wsSource.Cells(wsSource.Rows.Count, "C").End(xlUp).Row
-    
-    ' Trouvez la dernière ligne avec des données dans la feuille de destination
-    lastRowDest = wsDest.Cells(wsDest.Rows.Count, "B").End(xlUp).Row
-    
-    ' Bouclez à travers chaque ligne dans la feuille de destination
-    For i = 2 To lastRowDest ' Assurez-vous que la première ligne contient des en-têtes
-        
-        ' Réinitialisez le marqueur de "trouvé" pour chaque itération
-        found = False
-        
-        ' Bouclez à travers chaque ligne dans la feuille source
-        For j = 2 To lastRowSource ' Assurez-vous que la première ligne contient des en-têtes
-            
-            ' Vérifiez si le titre de la feuille de destination correspond au titre de la feuille source
-            If wsDest.Cells(i, 2).Value = wsSource.Cells(j, 3).Value Then
-                
-                ' Copiez la valeur correspondante de la colonne G de la feuille source
-                wsDest.Cells(i, 3).Value = wsSource.Cells(j, 7).Value
-                
-                ' Marquez comme "trouvé"
-                found = True
-                
-                ' Sortez de la boucle interne une fois que la correspondance est trouvée
-                Exit For
-            End If
-        Next j
-        
-        ' Si la correspondance n'est pas trouvée, vous pouvez ajouter un traitement supplémentaire ici si nécessaire
-        
-    Next i
-    
-    ' Fermez le classeur source
-    Workbooks(sourceFile).Close SaveChanges:=False
-    
-End Sub
+Bien sûr, voici un exemple simple de formulaire pour recueillir les préférences des collaborateurs pour la soirée de fin d'année :
+
+Sondage sur la Soirée de Fin d'Année
+
+Chers collaborateurs,
+
+Nous sommes ravis de vous inviter à notre soirée de fin d'année qui aura lieu le 19 décembre à partir de 18h. Afin de rendre cet événement mémorable, nous aimerions recueillir vos préférences pour choisir l'activité et le lieu qui correspondent le mieux à vos attentes.
+
+1. Vos coordonnées :
+Nom : ________________
+Prénom : ________________
+Service/Département : ________________
+Email : ________________
+Téléphone : ________________
+
+2. Préférences pour la soirée :
+Merci de sélectionner l'option de votre choix pour l'activité et le restaurant.
+
+a. Restaurant 1 : Apero dinatoire et boissons bar au choix et Billard/baby foot, musique
+b. Restaurant 2 : Escape Game et Buffet
