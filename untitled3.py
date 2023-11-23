@@ -7,7 +7,12 @@ Sub RemplirFichierDestination()
     Dim colTitreDest As Long
     Dim colTitreSource As Long
     Dim i As Long, lastRowDest As Long
+    Dim cheminRepertoire As String
     Dim fichierSource As String
+    Dim fichier As String
+
+    ' Spécifiez le chemin complet du répertoire où se trouvent vos fichiers source
+    cheminRepertoire = "C:\Votre\Chemin\Repertoire\"
 
     ' Définir la feuille de destination
     Set wsDest = ThisWorkbook.Sheets("FeuilleDestination")
@@ -21,7 +26,7 @@ Sub RemplirFichierDestination()
         dateCible = wsDest.Cells(1, i).Value
 
         ' Générer le nom du fichier source basé sur la date
-        fichierSource = "Cokpit_BASE" & Format(dateCible, "yyyymmdd") & ".xlsx"
+        fichierSource = cheminRepertoire & "Cokpit_BASE" & Format(dateCible, "yyyymmdd") & ".xlsx"
 
         ' Vérifier si le fichier source existe
         If Dir(fichierSource) <> "" Then
