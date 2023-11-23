@@ -1,59 +1,58 @@
-Sub MettreAJourFichierExcel()
-    Dim wbDestination As Workbook
-    Dim wsDestination As Worksheet
+Sub MettreAJourFichier()
+
+    Dim ws As Worksheet
+    Dim col As Range
+    Dim cell As Range
     Dim dateCell As Range
-    Dim sourceFilePath As String
     Dim sourceFileName As String
-    Dim destinationDate As Date
-    Dim sourceDate As Date
-    Dim matchRow As Variant
-    
-    ' Ouvrir le fichier destination
-    Set wbDestination = ThisWorkbook ' Le classeur actif
-    ' Remplacez "Feuil1" par le nom de votre feuille de destination
-    Set wsDestination = wbDestination.Sheets("Feuil1")
-    
-    ' Parcourir les dates dans les colonnes E à Z de la première ligne
-    For Each dateCell In wsDestination.Range("E1:Z1")
-        destinationDate = dateCell.Value
+    Dim sourceFilePath As String
+    Dim sourceWorkbook As Workbook
+    Dim sourceWS As Worksheet
+    Dim titre As String
+    Dim correspondance As Variant
+    Dim i As Long
+
+    ' Spécifiez ici la feuille de calcul que vous utilisez
+    Set ws = ThisWorkbook.Sheets("NomDeVotreFeuille")
+
+    ' Spécifiez ici la plage de colonnes E à Z
+    Set col = ws.Range("E1:Z1")
+
+    ' Boucle sur les colonnes de la première ligne
+    For Each dateCell In col
+        ' Générer le nom du fichier source en fonction de la date
+        sourceFileName = "Cokpit_BASE" & Format(dateCell.Value, "YYYYMMDD")
         
-        ' Construire le nom du fichier source en fonction de la date
-        sourceFileName = "Cokpit_BASE" & Format(destinationDate, "YYYYMMDD")
-        ' Construire le chemin complet du fichier source
-        sourceFilePath = ThisWorkbook.Path & "\" & sourceFileName & ".xlsx"
-        
+        ' Spécifiez ici le chemin du répertoire où se trouvent les fichiers source
+        sourceFilePath = "C:\Chemin\Vers\Votre\Repertoire\" & sourceFileName & ".xlsx"
+
         ' Vérifier si le fichier source existe
         If Dir(sourceFilePath) <> "" Then
             ' Ouvrir le fichier source
-            Dim wbSource As Workbook
-            Set wbSource = Workbooks.Open(sourceFilePath)
-            
-            ' Parcourir les valeurs de colonne C dans le fichier destination
-            For Each cell In wsDestination.Range("C2:C" & wsDestination.Cells(wsDestination.Rows.Count, "C").End(xlUp).Row)
-                ' Récupérer la date correspondante dans la ligne actuelle du fichier destination
-                sourceDate = wsDestination.Cells(cell.Row, dateCell.Column).Value
-                
-                ' Comparer les dates
-                If destinationDate = sourceDate Then
-                    ' Trouver la ligne correspondante dans le fichier source
-                    matchRow = Application.Match(cell.Value, wbSource.Sheets(1).Range("C:C"), 0)
-                    
-                    ' Vérifier si une correspondance a été trouvée
-                    If Not IsError(matchRow) Then
-                        ' Récupérer la valeur de la colonne G dans le fichier source
-                        wsDestination.Cells(cell.Row, dateCell.Column).Value = wbSource.Sheets(1).Cells(matchRow, 7).Value
-                    End If
+            Set sourceWorkbook = Workbooks.Open(sourceFilePath)
+            Set sourceWS = sourceWorkbook.Sheets(1)
+
+            ' Initialisation de la boucle (commence à la deuxième ligne et se termine à la ligne 35)
+            For i = 2 To 35
+                ' Récupération du titre dans la colonne C
+                titre = ws.Cells(i, 3).Value
+
+                ' Recherche de correspondance dans le fichier source
+                correspondance = Application.Match(titre, sourceWS.Columns(3), 0)
+
+                ' Gestion des correspondances
+                If Not IsError(correspondance) Then
+                    ' Correspondance trouvée, extraire la valeur de la colonne G dans le fichier source
+                    ws.Cells(i, dateCell.Column).Value = sourceWS.Cells(correspondance, 7).Value
                 End If
-            Next cell
-            
+            Next i
+
             ' Fermer le fichier source
-            wbSource.Close SaveChanges:=False
+            sourceWorkbook.Close SaveChanges:=False
         Else
-            ' Afficher un message si le fichier source est introuvable
-            MsgBox "Le fichier source '" & sourceFilePath & "' n'existe pas."
+            ' Afficher un message si le fichier source n'est pas trouvé
+            MsgBox "Le fichier source " & sourceFileName & " n'a pas été trouvé.", vbExclamation
         End If
     Next dateCell
-    
-    ' Enregistrer le fichier destination
-    wbDestination.Save
+
 End Sub
