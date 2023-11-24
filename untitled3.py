@@ -1,41 +1,32 @@
-Sub ChangerMois(versMoisSuivant As Boolean)
-    Dim feuille As Worksheet
-    Dim colonneDebut As Integer
-    Dim colonneFin As Integer
-    Dim ligneDebut As Integer
-    Dim ligneFin As Integer
-    Dim celluleDate As Range
-    Dim nouvelleDate As Date
-    
-    ' Spécifiez la feuille de calcul
-    Set feuille = ThisWorkbook.Sheets("NomDeVotreFeuille") ' Remplacez "NomDeVotreFeuille" par le nom de votre feuille
-    
-    ' Spécifiez la plage de colonnes et de lignes
-    colonneDebut = 5 ' Colonne E
-    colonneFin = 34 ' Colonne AH
-    ligneDebut = 2 ' 2ème ligne
-    ligneFin = 30 ' 30ème ligne
-    
-    ' Trouver la cellule contenant la date actuelle (la première date dans la plage spécifiée)
-    Set celluleDate = feuille.Cells(ligneDebut, colonneDebut)
-    
-    ' Récupérer la date actuelle
-    Dim dateActuelle As Date
-    dateActuelle = celluleDate.Value
-    
-    ' Calculer la nouvelle date en ajoutant ou en soustrayant un mois
-    If versMoisSuivant Then
-        nouvelleDate = DateAdd("m", 1, dateActuelle)
-    Else
-        nouvelleDate = DateAdd("m", -1, dateActuelle)
+Sub ChangerDatesEtValeursSansWeekend()
+    ' Demander à l'utilisateur d'entrer le mois
+    Dim mois As String
+    mois = InputBox("Entrez le mois (MM/YYYY) :", "Changer les dates")
+
+    ' Vérifier si l'utilisateur a annulé
+    If mois = "" Then
+        Exit Sub
     End If
-    
-    ' Mettre à jour la première cellule de date
-    celluleDate.Value = nouvelleDate
-    
-    ' Mettre à jour les valeurs en dessous de la date dans la plage spécifiée
-    Dim i As Integer
-    For i = ligneDebut + 1 To ligneFin
-        feuille.Cells(i, colonneDebut).FormulaR1C1 = "=EDATE(R[-1]C,1)"
-    Next i
+
+    ' Déterminer le premier jour du mois
+    Dim premierJour As Date
+    premierJour = DateValue("01/" & mois)
+
+    ' Boucler à travers les colonnes de E à AH
+    Dim col As Integer
+    For col = 5 To 34 ' Correspond à la plage E1:AH1
+        ' Trouver le premier jour ouvrable du mois
+        While Weekday(premierJour, vbMonday) > 5 ' Si c'est un week-end
+            premierJour = premierJour + 1 ' Passer au jour suivant
+        Wend
+
+        ' Changer la date dans la cellule en fonction du mois fourni par l'utilisateur
+        Cells(1, col).Value = premierJour
+
+        ' Effacer les valeurs dans les cellules de la colonne correspondante (ligne 2 à 30)
+        Columns(col).Range("A2:A30").ClearContents
+
+        ' Passer au jour ouvrable suivant
+        premierJour = premierJour + 1
+    Next col
 End Sub
