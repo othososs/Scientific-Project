@@ -1,58 +1,62 @@
-Sub MettreAJourFichier()
+Sub DeplacerMois()
 
-    Dim ws As Worksheet
-    Dim col As Range
-    Dim cell As Range
+    Dim debutColonne As Integer
+    Dim finColonne As Integer
     Dim dateCell As Range
-    Dim sourceFileName As String
-    Dim sourceFilePath As String
-    Dim sourceWorkbook As Workbook
-    Dim sourceWS As Worksheet
-    Dim titre As String
-    Dim correspondance As Variant
-    Dim i As Long
+    Dim jourSemaine As Integer
+    Dim moisActuel As Integer
+    Dim anneeActuelle As Integer
 
-    ' Spécifiez ici la feuille de calcul que vous utilisez
-    Set ws = ThisWorkbook.Sheets("NomDeVotreFeuille")
+    ' Spécifiez la plage des colonnes contenant les dates
+    debutColonne = 5 ' Colonne E
+    finColonne = 26 ' Colonne Z
 
-    ' Spécifiez ici la plage de colonnes E à Z
-    Set col = ws.Range("E1:Z1")
+    ' Récupérez la date de la première cellule de la plage
+    Set dateCell = Cells(1, debutColonne)
 
-    ' Boucle sur les colonnes de la première ligne
-    For Each dateCell In col
-        ' Générer le nom du fichier source en fonction de la date
-        sourceFileName = "Cokpit_BASE" & Format(dateCell.Value, "YYYYMMDD")
-        
-        ' Spécifiez ici le chemin du répertoire où se trouvent les fichiers source
-        sourceFilePath = "C:\Chemin\Vers\Votre\Repertoire\" & sourceFileName & ".xlsx"
+    ' Obtenez le mois actuel et l'année
+    moisActuel = Month(dateCell.Value)
+    anneeActuelle = Year(dateCell.Value)
 
-        ' Vérifier si le fichier source existe
-        If Dir(sourceFilePath) <> "" Then
-            ' Ouvrir le fichier source
-            Set sourceWorkbook = Workbooks.Open(sourceFilePath)
-            Set sourceWS = sourceWorkbook.Sheets(1)
+    ' Demandez à l'utilisateur s'il veut déplacer vers le mois suivant ou précédent
+    Dim choix As Integer
+    choix = MsgBox("Voulez-vous déplacer vers le mois suivant (Oui) ou le mois précédent (Non)?", vbYesNo)
 
-            ' Initialisation de la boucle (commence à la deuxième ligne et se termine à la ligne 35)
-            For i = 2 To 35
-                ' Récupération du titre dans la colonne C
-                titre = ws.Cells(i, 3).Value
-
-                ' Recherche de correspondance dans le fichier source
-                correspondance = Application.Match(titre, sourceWS.Columns(3), 0)
-
-                ' Gestion des correspondances
-                If Not IsError(correspondance) Then
-                    ' Correspondance trouvée, extraire la valeur de la colonne G dans le fichier source
-                    ws.Cells(i, dateCell.Column).Value = sourceWS.Cells(correspondance, 7).Value
-                End If
-            Next i
-
-            ' Fermer le fichier source
-            sourceWorkbook.Close SaveChanges:=False
-        Else
-            ' Afficher un message si le fichier source n'est pas trouvé
-            MsgBox "Le fichier source " & sourceFileName & " n'a pas été trouvé.", vbExclamation
+    ' Déplacez les dates en conséquence
+    If choix = vbYes Then
+        moisActuel = moisActuel + 1
+        If moisActuel > 12 Then
+            moisActuel = 1
+            anneeActuelle = anneeActuelle + 1
         End If
-    Next dateCell
+    Else
+        moisActuel = moisActuel - 1
+        If moisActuel < 1 Then
+            moisActuel = 12
+            anneeActuelle = anneeActuelle - 1
+        End If
+    End If
+
+    ' Mettez à jour les dates dans les colonnes spécifiées
+    For i = debutColonne To finColonne
+        Set dateCell = Cells(1, i)
+        dateCell.Value = DateSerial(anneeActuelle, moisActuel, GetProchaineDateValide(dateCell.Value, choix))
+    Next i
 
 End Sub
+
+Function GetProchaineDateValide(dateOrigine As Date, sens As Integer) As Integer
+    ' Fonction pour obtenir la prochaine date valide (en excluant les week-ends)
+    Dim nouvelleDate As Date
+    nouvelleDate = dateOrigine
+    Do
+        If sens = vbYes Then
+            nouvelleDate = nouvelleDate + 1
+        Else
+            nouvelleDate = nouvelleDate - 1
+        End If
+    Loop While Weekday(nouvelleDate, vbMonday) > 5 ' Exclut les samedis et dimanches
+
+    GetProchaineDateValide = Day(nouvelleDate)
+
+End Function
