@@ -5,7 +5,6 @@ Sub DeplacerMois()
     Dim dateCell As Range
     Dim moisActuel As Integer
     Dim anneeActuelle As Integer
-    Dim limiteTentatives As Integer
 
     ' Spécifiez la plage des colonnes contenant les dates
     debutColonne = 5 ' Colonne E
@@ -37,37 +36,31 @@ Sub DeplacerMois()
         End If
     End If
 
-    ' Limite le nombre de tentatives pour éviter une boucle infinie
-    limiteTentatives = 100
-
     ' Mettez à jour les dates dans les colonnes spécifiées
     For i = debutColonne To finColonne
         Set dateCell = Cells(1, i)
-        dateCell.Value = GetProchaineDateValide(dateCell.Value, choix, limiteTentatives)
+        dateCell.Value = GetProchaineDateValide(dateCell.Value, choix)
     Next i
 
 End Sub
 
-Function GetProchaineDateValide(dateOrigine As Date, sens As Integer, limiteTentatives As Integer) As Date
+Function GetProchaineDateValide(dateOrigine As Date, sens As Integer) As Date
     ' Fonction pour obtenir la prochaine date valide (en excluant les week-ends)
+
     Dim nouvelleDate As Date
-    Dim tentatives As Integer
+    Dim joursAajouter As Integer
     nouvelleDate = dateOrigine
-    tentatives = 0
+    
+    ' Spécifie le nombre de jours à ajouter ou soustraire en fonction du sens
+    If sens = vbYes Then
+        joursAajouter = 1
+    Else
+        joursAajouter = -1
+    End If
 
+    ' Ajoute ou soustrait les jours et ajuste si nécessaire pour éviter les week-ends
     Do
-        If sens = vbYes Then
-            nouvelleDate = DateAdd("d", 1, nouvelleDate)
-        Else
-            nouvelleDate = DateAdd("d", -1, nouvelleDate)
-        End If
-
-        ' Évite une boucle infinie
-        tentatives = tentatives + 1
-        If tentatives > limiteTentatives Then
-            Exit Do
-        End If
-
+        nouvelleDate = DateAdd("d", joursAajouter, nouvelleDate)
     Loop While Weekday(nouvelleDate, vbMonday) > 5 ' Exclut les samedis et dimanches
 
     GetProchaineDateValide = nouvelleDate
