@@ -40,23 +40,22 @@ Sub DeplacerMois()
     ' Mettez à jour les dates dans les colonnes spécifiées
     For i = debutColonne To finColonne
         Set dateCell = Cells(1, i)
-        dateCell.Value = DateSerial(anneeActuelle, moisActuel, GetProchaineDateValide(dateCell.Value, choix))
+        dateCell.Value = GetProchaineDateValide(dateCell.Value, choix)
     Next i
 
 End Sub
 
-Function GetProchaineDateValide(dateOrigine As Date, sens As Integer) As Integer
+Function GetProchaineDateValide(dateOrigine As Date, sens As Integer) As Date
     ' Fonction pour obtenir la prochaine date valide (en excluant les week-ends)
     Dim nouvelleDate As Date
     nouvelleDate = dateOrigine
     Do
         If sens = vbYes Then
-            nouvelleDate = nouvelleDate + 1
+            nouvelleDate = DateAdd("d", 1, nouvelleDate)
         Else
-            nouvelleDate = nouvelleDate - 1
+            nouvelleDate = DateAdd("d", -1, nouvelleDate)
         End If
     Loop While Weekday(nouvelleDate, vbMonday) > 5 ' Exclut les samedis et dimanches
 
-    GetProchaineDateValide = Day(nouvelleDate)
-
+    GetProchaineDateValide = nouvelleDate
 End Function
