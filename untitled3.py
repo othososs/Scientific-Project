@@ -1,51 +1,61 @@
-Sub RemplirValeurs()
+Sub TraitementDonnees()
 
+    ' Déclaration des variables
     Dim ws As Worksheet
-    Dim dateCell As Range
-    Dim folderPath As String, monthFolder As String
-    Dim fileName As String
+    Dim cheminRepertoire As String
+    Dim dossierMois As String
+    Dim fichier As String
+    Dim dateFichier As Date
+    Dim wb As Workbook
+    Dim wsFichier As Worksheet
     Dim lastRow As Long
-    Dim rowCount As Long
+    Dim bloquants As Long
+    Dim importants As Long
     
-    ' Référence à la feuille de calcul
-    Set ws = ThisWorkbook.Sheets("NomDeVotreFeuille")
-
-    ' Chemin du dossier racine
-    folderPath = "C:\Dossier\down\"
-
-    ' Parcourir les cellules de la ligne 1 de E à AA
-    For Each dateCell In ws.Range("E1:AA1")
-        ' Convertir la date en format "mm - Mois"
-        monthFolder = Format(dateCell.Value, "mm - Mmmm")
-        
-        ' Construire le chemin complet du dossier
-        folderPath = folderPath & monthFolder & "\"
-
-        ' Parcourir les fichiers dans le dossier
-        fileName = Dir(folderPath & "COU2 Places - Circuit du " & Format(dateCell.Value, "ddmmyy") & ".xls")
-        
-        ' Vérifier si le fichier existe
-        If Len(fileName) > 0 Then
-            ' Ouvrir le classeur de travail
-            Workbooks.Open (folderPath & fileName)
+    ' Référence à la feuille de travail actuelle
+    Set ws = ThisWorkbook.Sheets("VotreFeuille")
+    
+    ' Récupérer les dates dans la plage E1:AA1
+    For Each cell In ws.Range("E1:AA1")
+        If IsDate(cell.Value) Then
+            ' Récupérer la date
+            dateFichier = cell.Value
             
-            ' Trouver le nombre de lignes dans la colonne X, à partir de la ligne 3
-            lastRow = Cells(Rows.Count, "X").End(xlUp).Row
-            ' Filtrer et compter les lignes sans "Pas intervention"
-            rowCount = Application.WorksheetFunction.CountIfs(ws.Range("X3:X" & lastRow), "<>Pas intervention")
+            ' Construire le chemin du répertoire
+            cheminRepertoire = "C:\Votre\Chemin\Repertoire\" ' Mettez votre chemin de répertoire ici
+            dossierMois = Format(dateFichier, "mm-mmmm")
+            cheminRepertoire = cheminRepertoire & dossierMois & "\"
             
-            ' Fermer le classeur de travail
-            ActiveWorkbook.Close
+            ' Ouvrir le classeur dans le répertoire
+            fichier = "ecacouQP_D" & Format(dateFichier, "yymmdd") & "*"
+            fichier = Dir(cheminRepertoire & fichier & ".xlsx")
             
-            ' Mettre la valeur dans la cellule correspondante sur la feuille d'origine
-            ws.Cells(28, dateCell.Column).Value = rowCount
-        Else
-            ' Si le fichier n'existe pas, afficher un message d'erreur
-            MsgBox "Le fichier pour la date " & Format(dateCell.Value, "dd/mm/yyyy") & " n'a pas été trouvé.", vbExclamation
+            Do While fichier <> ""
+                ' Ouvrir le classeur
+                Set wb = Workbooks.Open(cheminRepertoire & fichier)
+                
+                ' Assurer la référence à la feuille correcte dans le classeur ouvert
+                Set wsFichier = wb.Sheets("VotreFeuille")
+                
+                ' Filtrer la colonne AE
+                wsFichier.AutoFilterMode = False ' Supprimer les filtres existants
+                wsFichier.Range("AE:AE").AutoFilter Field:=1, Criteria1:="<>Pas d'intervention auto"
+                
+                ' Compter le nombre de lignes Bloquants et Importants
+                bloquants = Application.WorksheetFunction.CountIf(wsFichier.Range("A:A"), "Bloquant")
+                importants = Application.WorksheetFunction.CountIf(wsFichier.Range("A:A"), "Important")
+                
+                ' Fermer le classeur sans sauvegarder les modifications
+                wb.Close SaveChanges:=False
+                
+                ' Mettre à jour les données sur la feuille principale
+                ws.Cells(29, ws.Columns(dateFichier).Column).Value = bloquants
+                ws.Cells(30, ws.Columns(dateFichier).Column).Value = importants
+                
+                ' Trouver le prochain fichier
+                fichier = Dir
+            Loop
         End If
-        
-        ' Réinitialiser le chemin du dossier racine pour la prochaine itération
-        folderPath = "C:\Dossier\down\"
-    Next dateCell
+    Next cell
 
 End Sub
