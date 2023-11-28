@@ -27,15 +27,14 @@ Sub TraitementDonnees()
             cheminRepertoire = cheminRepertoire & dossierMois & "\"
             
             ' Ouvrir le classeur dans le répertoire
-            fichier = "ecacouQP_D" & Format(dateFichier, "yymmdd") & "*"
-            fichier = Dir(cheminRepertoire & fichier & ".xlsx")
+            fichier = Dir(cheminRepertoire & "ecacouQP_D" & Format(dateFichier, "yymmdd") & "*.xlsx")
             
             Do While fichier <> ""
                 ' Ouvrir le classeur
                 Set wb = Workbooks.Open(cheminRepertoire & fichier)
                 
-                ' Assurer la référence à la feuille correcte dans le classeur ouvert
-                Set wsFichier = wb.Sheets("VotreFeuille")
+                ' Utiliser la première feuille du classeur ouvert
+                Set wsFichier = wb.Sheets(1)
                 
                 ' Filtrer la colonne AE
                 wsFichier.AutoFilterMode = False ' Supprimer les filtres existants
