@@ -1,36 +1,52 @@
-Sub CreerCalendrier()
+Sub GenererDates()
+    ' Déclaration des variables
+    Dim ws As Worksheet
+    Dim debutColonne As Integer
+    Dim finColonne As Integer
+    Dim ligneDebut As Integer
+    Dim ligneFin As Integer
+    Dim moisAnnee As String
     Dim dateDebut As Date
     Dim dateFin As Date
-    Dim mois As Integer
-    Dim annee As Integer
-    Dim jourActuel As Date
-    Dim colActuelle As Integer
+    Dim dateCourante As Date
     
-    ' Demander à l'utilisateur de saisir le mois et l'année
-    mois = InputBox("Entrez le mois (1-12):", "Mois")
-    annee = InputBox("Entrez l'année:", "Année")
+    ' Spécifiez le nom de votre feuille de calcul
+    Set ws = ThisWorkbook.Sheets("NomDeVotreFeuille")
     
-    ' Vérifier si les valeurs saisies sont valides
-    If mois < 1 Or mois > 12 Then
-        MsgBox "Mois invalide. Veuillez entrer un mois entre 1 et 12.", vbExclamation
-        Exit Sub
-    End If
+    ' Spécifiez la plage des colonnes E à AC
+    debutColonne = 5 ' Colonne E
+    finColonne = 29 ' Colonne AC
     
-    ' Définir la date de début comme étant le premier jour du mois spécifié
-    dateDebut = DateSerial(annee, mois, 1)
+    ' Spécifiez la plage des lignes de 2 à 30
+    ligneDebut = 2
+    ligneFin = 30
     
-    ' Trouver le dernier jour du mois
-    dateFin = DateSerial(annee, mois + 1, 1) - 1
+    ' Effacez les dates de la première ligne
+    ws.Range(ws.Cells(1, debutColonne), ws.Cells(1, finColonne)).ClearContents
     
-    ' Boucler à travers les jours du mois
-    For jourActuel = dateDebut To dateFin
-        ' Vérifier si le jour est un jour de semaine (du lundi au vendredi)
-        If Weekday(jourActuel, vbMonday) >= 2 And Weekday(jourActuel, vbMonday) <= 6 Then
-            ' Trouver la prochaine colonne vide à partir de la colonne E
-            colActuelle = Cells(1, Columns.Count).End(xlToLeft).Column + 1
+    ' Effacez les valeurs dans la plage spécifiée
+    ws.Range(ws.Cells(ligneDebut, debutColonne), ws.Cells(ligneFin, finColonne)).ClearContents
+    
+    ' Demandez à l'utilisateur de saisir le mois/année au format "mm/yyyy"
+    moisAnnee = InputBox("Entrez le mois/année au format mm/yyyy", "Mois/Année")
+    
+    ' Vérifiez si l'entrée est valide
+    If IsDate("01/" & moisAnnee) Then
+        dateDebut = DateValue("01/" & moisAnnee)
+        dateFin = DateAdd("m", 1, dateDebut) - 1 ' Dernier jour du mois
+        dateCourante = dateDebut
+        
+        ' Générez les dates et remplissez la première ligne
+        For i = debutColonne To finColonne
+            ' Ignorez les weekends (samedi et dimanche)
+            Do While Weekday(dateCourante) = 1 Or Weekday(dateCourante) = 7
+                dateCourante = dateCourante + 1
+            Loop
             
-            ' Mettre à jour la cellule avec la nouvelle date
-            Cells(1, colActuelle).Value = jourActuel
-        End If
-    Next jourActuel
+            ws.Cells(1, i).Value = Format(dateCourante, "dd/mm/yyyy")
+            dateCourante = dateCourante + 1
+        Next i
+    Else
+        MsgBox "Format de date incorrect. Veuillez utiliser le format mm/yyyy.", vbExclamation
+    End If
 End Sub
