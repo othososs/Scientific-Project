@@ -43,6 +43,11 @@ Sub GenererDates()
                 dateCourante = dateCourante + 1
             Loop
             
+            ' Arrêtez lorsque la date atteint la fin du mois
+            If dateCourante > dateFin Then
+                Exit For
+            End If
+            
             ws.Cells(1, i).Value = Format(dateCourante, "dd/mm/yyyy")
             dateCourante = dateCourante + 1
         Next i
