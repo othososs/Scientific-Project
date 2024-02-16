@@ -7,12 +7,7 @@ CC pendientes : Pending CC
 % conversion CC pendientes : % Conversion of Pending CC
 Evolucion CC aprobadas por dia : Evolution of Approved CC per day
 % exito de CC : % Success Rate of CC
-N'hésitez pas si vous avez d'autres termes à traduire ou si vous avez d'autres questions !
 
-User
-tu peux donner en francais 
-ChatGPT
-Bien sûr, voici la traduction des indicateurs de votre tableau de bord de l'espagnol vers le français :
 
 Cuenta corriente (CC) : Compte courant (CC)
 Inicio contratacion -CC : Début de souscription - CC
