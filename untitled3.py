@@ -1,94 +1,19 @@
-Acquisition :
-Taux de Conversion par Canal :
+Demandes d'Informations : Les personnes qui soumettent des demandes d'informations sur vos produits ou services, que ce soit par le biais de votre site web, de courriers électroniques ou de formulaires de contact, peuvent être considérées comme des leads potentiels.
 
-Taux de conversion par canal marketing (publicité en ligne, médias sociaux, e-mails, etc.).
-Coût d'acquisition par conversion pour chaque canal.
-Taux de rebond sur les pages d'atterrissage.
-Leads Qualifiés :
+Demandes de Préqualification : Si vous proposez des produits spécifiques tels que des prêts hypothécaires, des cartes de crédit, ou d'autres services financiers, les personnes qui demandent une préqualification ou une estimation peuvent être considérées comme des leads qualifiés.
 
-Pourcentage de leads qualifiés par rapport aux leads générés.
-Taux de conversion des leads qualifiés en clients.
-Temps Avant Conversion :
+Inscriptions aux Newsletters : Les personnes qui s'inscrivent volontairement à votre newsletter pour recevoir des mises à jour, des conseils financiers ou d'autres informations connexes montrent un intérêt potentiel pour vos services.
 
-Temps moyen entre la première interaction avec le site ou l'application et la conversion.
-Comparaison du temps avant conversion entre les canaux d'acquisition.
-Efficacité des Campagnes Publicitaires :
+Téléchargement de Ressources : Si vous proposez des guides, des brochures ou d'autres ressources téléchargeables sur votre site, ceux qui téléchargent ces documents peuvent être des leads intéressés par les sujets traités.
 
-Retour sur investissement (ROI) pour chaque campagne publicitaire.
-CTR (taux de clic) et impressions pour les annonces en ligne.
-Performance des campagnes A/B testées.
-Client Engagement :
-Fréquence d'Utilisation des Fonctionnalités :
+Activité sur le Site Web : Suivez le comportement des visiteurs sur votre site web. Ceux qui visitent des pages spécifiques, telles que les pages de produits, les pages de tarification ou les pages de contact, peuvent être des leads potentiels.
 
-Nombre moyen de transactions par client.
-Fréquence d'utilisation des services en ligne (consultation de solde, virement, etc.).
-Taux de conversion des utilisateurs occasionnels en utilisateurs fréquents.
-Temps Passé sur la Plateforme par Session :
+Interactions sur les Médias Sociaux : Les personnes qui interagissent avec votre marque sur les médias sociaux, posent des questions, partagent votre contenu financier, ou expriment un intérêt particulier peuvent être considérées comme des leads.
 
-Analyse de la durée moyenne des sessions.
-Identification des moments de la journée où l'engagement est le plus élevé.
-Temps passé sur des fonctionnalités spécifiques.
-Analyse de la Navigation :
+Participation à des Webinaires ou Événements en Ligne : Si vous organisez des webinaires, des séminaires en ligne ou d'autres événements, les participants peuvent être des leads intéressés par les sujets abordés.
 
-Chemin de navigation typique des utilisateurs.
-Taux d'abandon à différentes étapes du processus (par exemple, lors du remplissage d'un formulaire).
-Nombre de Produits/Services Utilisés :
+Tracking des Activités Bancaires en Ligne : Pour les clients existants, surveillez leur activité en ligne. Par exemple, des recherches fréquentes sur des produits ou des services spécifiques peuvent indiquer un intérêt potentiel.
 
-Profil de diversification des produits par client.
-Taux d'adoption des nouveaux produits ou services.
-Client Satisfaction :
-Scores de Satisfaction :
+Referrals et Recommandations : Si des clients actuels recommandent activement vos services à d'autres, ces recommandations peuvent être des leads potentiels.
 
-Scores de satisfaction pour des aspects spécifiques tels que la facilité d'utilisation, la rapidité des transactions, etc.
-Évolution des scores de satisfaction au fil du temps.
-Comparaison entre Segments de Clients :
-
-Satisfaction des nouveaux clients par rapport aux clients existants.
-Comparaison de la satisfaction entre différents groupes démographiques.
-Analyse des Commentaires Clients :
-
-Identification des thèmes récurrents dans les commentaires.
-Taux de réponse aux problèmes signalés par les clients.
-Promotions :
-Performance des Promotions par Canal :
-
-Taux de conversion après utilisation d'un code promotionnel pour chaque canal.
-Analyse de la popularité des promotions sur les médias sociaux.
-Rétention des Clients Ayant Utilisé une Promotion :
-
-Comparaison de la rétention entre les clients ayant utilisé une promotion et ceux qui ne l'ont pas fait.
-Impact à long terme des promotions sur la valeur client.
-ROI des Promotions :
-
-Comparaison du ROI des différentes promotions.
-Analyse de la fidélisation des clients après l'utilisation d'une promotion.
-Churn Analysis :
-Taux de Désabonnement par Période :
-
-Taux de désabonnement mensuel, trimestriel, annuel, etc.
-Identification des périodes de l'année présentant un taux de désabonnement plus élevé.
-Raisons du Désabonnement :
-
-Analyse des raisons spécifiques pour lesquelles les clients se désabonnent.
-Suivi des changements de comportement avant le désabonnement.
-Comparaison Pré et Post-Désabonnement :
-
-Analyse du comportement des clients avant et après le désabonnement.
-Identification des différences dans l'utilisation des fonctionnalités.
-Autres Paramètres :
-Taux d'Adoption des Nouvelles Fonctionnalités :
-
-Temps nécessaire pour que les clients adoptent de nouvelles fonctionnalités.
-Taux d'utilisation des nouvelles fonctionnalités par rapport aux fonctionnalités existantes.
-Taux d'Erreur lors des Transactions :
-
-Taux d'échec des transactions en ligne.
-Causes spécifiques des erreurs de transaction.
-Analyse des Sessions de Service Client en Ligne :
-
-Taux de conversion après une interaction avec le service client en ligne.
-Temps moyen passé lors des sessions de service client en ligne.
-Taux d'Utilisation des Services Bancaires Mobiles :
-
-Pourcentage de clients utilisant activement les services bancaires mobiles.
-Comparaison de l'engagement entre les utilisateurs mobiles et non mobiles.
+Analyse des Taux d'Engagement : Utilisez des analyses pour suivre le taux d'engagement sur votre site web, les taux de conversion sur les pages clés, et les interactions avec les e-mails pour identifier les leads potentiels.
