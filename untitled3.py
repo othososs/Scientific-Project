@@ -1,55 +1,40 @@
-Slide 1 - Introduction
-"La Digitalisation chez BNP Paribas Personal Finance"
-
-Transformation digitale comme opportunité majeure.
-Répondre efficacement aux besoins clients.
-Slide 2 - Objectifs du Stage
-"Objectifs de la Mission"
-
-Travailler au sein du département "Personal Finance GBL Customer Experience, Applied Innovation et Marketing".
-Identifier et évaluer les opportunités liées à la Banque digitale et à d'autres sujets innovants.
-Slide 3 - Rôle Multidisciplinaire
-"Un Rôle Clé dans l'Analyse et l'Innovation"
-
-Rôle centré sur l'analyse, la modélisation et la réponse aux besoins des équipes métiers.
-Utilisation de solutions d'analyse de données / de data science.
 Slide 4 - Missions Concrètes
 "Vos Missions sur le Terrain"
 
-Compréhension des Outils et Défis :
+Analyse du Comportement des Visiteurs :
 
-Analyser les outils existants dans les pays PF liés à la banque digitale.
-Identifier les défis actuels et les opportunités d'amélioration.
-Analyses de Données Collaboratives :
+Utiliser Adobe Analytics pour suivre les parcours et le comportement des visiteurs.
+Identifier les pages les plus visitées, les points de sortie, etc.
+Analyse des Produits de Banque Digitale :
 
-Travailler en étroite collaboration avec les parties prenantes des projets dans les pays clients.
-Réaliser des analyses de données approfondies pour informer les décisions.
-Partage des Résultats et Communication :
+Identifier les produits de banque digitale qui suscitent le plus d'intérêt.
+Analyser les tendances d'interaction avec ces produits.
+Prédictions sur les Variables Clés :
 
-Présenter et partager les résultats des analyses aux nouveaux membres/utilisateurs.
-Communiquer de manière claire et engageante les insights tirés des données.
+Développer des modèles de prédiction pour des variables spécifiques.
+Par exemple, prédire la conversion après certaines interactions.
 Slide 5 - Collaboration Transversale
-"Collaboration Transversale et Environnement de Travail"
+"Collaboration Transversale et Importance de l'Analytique"
 
-Interaction avec les équipes analytiques, digitales et autres parties prenantes.
-Importance de l'environnement de travail pour la réussite.
-Slide 6 - Projets Data Analyst
-"Projets Concrets en Analyse de Données"
+Interagir avec les équipes analytiques pour partager les résultats.
+Mettre en avant le rôle clé d'Adobe Analytics dans la collaboration transversale.
+Slide 6 - Projets avec Adobe Analytics
+"Projets Concrets en Utilisation d'Adobe Analytics"
 
-Segmentation Client :
+Segmentation des Visiteurs :
 
-Construire des segmentations pour une meilleure compréhension du portefeuille client.
-Tester des stratégies de personnalisation basées sur ces segments.
-Optimisation des Prix :
+Utiliser les fonctionnalités de segmentation d'Adobe Analytics pour mieux comprendre les profils de visiteurs.
+Personnaliser les offres en fonction des segments identifiés.
+Cartographie du Parcours Client :
 
-Participer à des tests sur des stratégies de prix pour maximiser la rentabilité.
-Comparer les portefeuilles clients pour des ajustements éventuels.
-Analyse d'Actifs Digitaux :
+Créer des cartes de parcours client pour optimiser le flux de navigation.
+Identifier les étapes où les visiteurs peuvent abandonner.
+Prévisions de Conversion :
 
-Collaborer avec les équipes digitales pour analyser les performances des actifs numériques (app, site web, homebanking).
-Proposer des améliorations basées sur les analyses.
+Utiliser des modèles de prédiction pour anticiper les taux de conversion.
+Ajuster les stratégies en fonction des prévisions.
 Slide 7 - Conclusion
-"Vers une Banque Plus Digitale et Innovante"
+"Optimiser l'Expérience Client avec Adobe Analytics"
 
-Impact attendu sur l'évolution vers une banque plus digitale et innovante.
+Impact attendu sur l'optimisation de l'expérience client.
 Résumé des points clés de la mission.
