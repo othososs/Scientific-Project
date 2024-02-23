@@ -1,45 +1,55 @@
-Fréquence des Transactions :
+Slide 1 - Introduction
+"La Digitalisation chez BNP Paribas Personal Finance"
 
-Nombre moyen de transactions par client sur une période donnée.
-Répartition des transactions par type (virements, paiements, consultation de solde, etc.).
-Utilisation des Services en Ligne :
+Transformation digitale comme opportunité majeure.
+Répondre efficacement aux besoins clients.
+Slide 2 - Objectifs du Stage
+"Objectifs de la Mission"
 
-Taux d'adoption des services bancaires en ligne.
-Fréquence de connexion aux services en ligne par client.
-Temps Passé sur la Plateforme :
+Travailler au sein du département "Personal Finance GBL Customer Experience, Applied Innovation et Marketing".
+Identifier et évaluer les opportunités liées à la Banque digitale et à d'autres sujets innovants.
+Slide 3 - Rôle Multidisciplinaire
+"Un Rôle Clé dans l'Analyse et l'Innovation"
 
-Temps moyen que les clients passent sur la plateforme par session.
-Tendances de la durée des sessions au fil du temps.
-Nombre de Produits/Services Utilisés :
+Rôle centré sur l'analyse, la modélisation et la réponse aux besoins des équipes métiers.
+Utilisation de solutions d'analyse de données / de data science.
+Slide 4 - Missions Concrètes
+"Vos Missions sur le Terrain"
 
-Profil de diversification des produits par client.
-Taux d'adoption de nouveaux produits ou services.
-Réponses aux Campagnes d'Engagement :
+Compréhension des Outils et Défis :
 
-Taux de participation aux campagnes promotionnelles ou d'engagement.
-Analyse des résultats des campagnes pour mesurer l'impact sur l'engagement.
-Satisfaction Après Interaction :
+Analyser les outils existants dans les pays PF liés à la banque digitale.
+Identifier les défis actuels et les opportunités d'amélioration.
+Analyses de Données Collaboratives :
 
-Scores de satisfaction recueillis après des interactions spécifiques (par exemple, après un appel au service client, une transaction en ligne, etc.).
-Utilisation des Fonctionnalités Spécifiques :
+Travailler en étroite collaboration avec les parties prenantes des projets dans les pays clients.
+Réaliser des analyses de données approfondies pour informer les décisions.
+Partage des Résultats et Communication :
 
-Fréquence d'utilisation de fonctionnalités spécifiques, telles que la gestion des alertes, la configuration de virements automatiques, etc.
-Navigation sur le Site/ l'Application :
+Présenter et partager les résultats des analyses aux nouveaux membres/utilisateurs.
+Communiquer de manière claire et engageante les insights tirés des données.
+Slide 5 - Collaboration Transversale
+"Collaboration Transversale et Environnement de Travail"
 
-Chemin de navigation typique des clients lorsqu'ils utilisent votre site web ou votre application.
-Taux d'abandon à différentes étapes du processus en ligne.
-Réponses aux Enquêtes de Satisfaction :
+Interaction avec les équipes analytiques, digitales et autres parties prenantes.
+Importance de l'environnement de travail pour la réussite.
+Slide 6 - Projets Data Analyst
+"Projets Concrets en Analyse de Données"
 
-Taux de participation aux enquêtes de satisfaction client.
-Résultats des enquêtes pour évaluer la perception de l'expérience client.
-Activité sur les Médias Sociaux :
+Segmentation Client :
 
-Engagement sur les plateformes de médias sociaux liées à votre service bancaire.
-Suivi des commentaires, mentions, ou questions des clients sur les médias sociaux.
-Taux de Conversion après Interaction :
+Construire des segmentations pour une meilleure compréhension du portefeuille client.
+Tester des stratégies de personnalisation basées sur ces segments.
+Optimisation des Prix :
 
-Mesurez le pourcentage de clients ayant effectué une action souhaitée après une interaction spécifique (par exemple, ouverture d'un compte après une consultation en ligne).
-Analyse des Taux d'Utilisation des Applications Mobiles :
+Participer à des tests sur des stratégies de prix pour maximiser la rentabilité.
+Comparer les portefeuilles clients pour des ajustements éventuels.
+Analyse d'Actifs Digitaux :
 
-Pourcentage de clients utilisant activement les applications mobiles pour accéder aux services bancaires.
-Fréquence d'utilisation des fonctionnalités spécifiques de l'application mobile.
+Collaborer avec les équipes digitales pour analyser les performances des actifs numériques (app, site web, homebanking).
+Proposer des améliorations basées sur les analyses.
+Slide 7 - Conclusion
+"Vers une Banque Plus Digitale et Innovante"
+
+Impact attendu sur l'évolution vers une banque plus digitale et innovante.
+Résumé des points clés de la mission.
