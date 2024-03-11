@@ -1,1 +1,1 @@
-I created segments on Adobe to track the number of individuals in the onboarding process for both the savings account and deposit funnels. This allows us to identify the number of individuals who have successfully completed the process, specifically reaching step 8. I also applied a filter based on the landing page type to determine whether it is related to a deposit or a savings account.
+za
