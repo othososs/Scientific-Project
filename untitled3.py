@@ -22,9 +22,19 @@ exit_pages = landing_deposit_entries.groupby('mk_id_visitors')['exit_page'].uniq
 return_visits = df[df['mk_id_visitors'].isin(exit_pages.index) & (df['session_number'] > 1)]
 return_entry_pages = return_visits.groupby('mk_id_visitors')['entry_page'].unique()
 
+# Sélectionner la date de la première entrée pour chaque visiteur
+first_entry_dates = landing_deposit_entries.groupby('mk_id_visitors')['date'].min()
+
+# Sélectionner la date de retour pour chaque visiteur
+return_dates = return_visits.groupby('mk_id_visitors')['date'].min()
+
 # Afficher les résultats
 print("Nombre de visiteurs qui sont entrés par 'landing deposit page':", len(landing_deposit_entries))
 print("\nPages par lesquelles les mêmes visiteurs sont partis après avoir entré par 'landing deposit page':")
 print(exit_pages)
 print("\nPages par lesquelles les mêmes visiteurs sont revenus après avoir quitté par 'landing deposit page':")
 print(return_entry_pages)
+print("\nDate de la première entrée pour chaque visiteur:")
+print(first_entry_dates)
+print("\nDate de retour pour chaque visiteur:")
+print(return_dates)
