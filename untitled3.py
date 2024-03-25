@@ -1,44 +1,30 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 
-# Supposons que votre DataFrame s'appelle df et que vous l'ayez déjà groupé par mk id
+# Supposons que votre DataFrame s'appelle df
+# Je vais créer un exemple de DataFrame pour la démonstration
+data = {
+    'date': ['2024-03-01', '2024-03-01', '2024-03-02', '2024-03-02', '2024-03-03'],
+    'entry_page': ['landing deposit page', 'product', 'landing deposit page', 'product', 'product'],
+    'exit_page': ['product', 'checkout', 'checkout', 'landing deposit page', 'checkout'],
+    'session_number': [1, 2, 1, 2, 1],  # Session number modifié
+    'mk_id_visitors': [101, 102, 101, 103, 101]
+}
 
-# Durée moyenne des visites par client
-average_time_spent = grouped_by_client['time spent per visit'].mean()
+df = pd.DataFrame(data)
 
-# Taux de rebond par client
-total_sessions = grouped_by_client['session number'].count()
-single_page_sessions = grouped_by_client.apply(lambda x: (x['exit pages'].count() == 1).sum())
-bounce_rate = (single_page_sessions / total_sessions) * 100
+# Sélectionner les visites où l'entrée est "landing deposit page"
+landing_deposit_entries = df[df['entry_page'] == 'landing deposit page']
 
-# Distribution des sessions par jour de la semaine
-df['day_of_week'] = df['date'].dt.dayofweek
-sessions_by_day = grouped_by_client['day_of_week'].value_counts().unstack(fill_value=0)
+# Sélectionner les visites des mêmes visiteurs lorsqu'ils quittent
+exit_pages = landing_deposit_entries.groupby('mk_id_visitors')['exit_page'].unique()
 
-# Graphiques
-plt.figure(figsize=(12, 6))
+# Sélectionner les return visitors en filtrant par session number > 1
+return_visits = df[df['mk_id_visitors'].isin(exit_pages.index) & (df['session_number'] > 1)]
+return_entry_pages = return_visits.groupby('mk_id_visitors')['entry_page'].unique()
 
-# Durée moyenne des visites par client
-plt.subplot(1, 3, 1)
-average_time_spent.plot(kind='bar', color='skyblue')
-plt.title('Durée moyenne des visites')
-plt.xlabel('Client ID')
-plt.ylabel('Durée moyenne (en secondes)')
-
-# Taux de rebond par client
-plt.subplot(1, 3, 2)
-bounce_rate.plot(kind='bar', color='salmon')
-plt.title('Taux de rebond')
-plt.xlabel('Client ID')
-plt.ylabel('Taux de rebond (%)')
-
-# Distribution des sessions par jour de la semaine
-plt.subplot(1, 3, 3)
-sessions_by_day.plot(kind='bar', stacked=True)
-plt.title('Distribution des sessions par jour de la semaine')
-plt.xlabel('Client ID')
-plt.ylabel('Nombre de sessions')
-plt.legend(['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'], loc='upper right')
-
-plt.tight_layout()
-plt.show()
+# Afficher les résultats
+print("Nombre de visiteurs qui sont entrés par 'landing deposit page':", len(landing_deposit_entries))
+print("\nPages par lesquelles les mêmes visiteurs sont partis après avoir entré par 'landing deposit page':")
+print(exit_pages)
+print("\nPages par lesquelles les mêmes visiteurs sont revenus après avoir quitté par 'landing deposit page':")
+print(return_entry_pages)
