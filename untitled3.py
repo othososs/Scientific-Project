@@ -1,38 +1,44 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
-# Supposons que votre DataFrame s'appelle df
+# Supposons que votre DataFrame s'appelle df et que vous l'ayez déjà groupé par mk id
 
-# Charger les données depuis votre fichier CSV ou autre source
-# df = pd.read_csv("votre_fichier.csv")
+# Durée moyenne des visites par client
+average_time_spent = grouped_by_client['time spent per visit'].mean()
 
-# Assurez-vous que les colonnes sont correctement typées, en particulier la colonne "date"
-# df['date'] = pd.to_datetime(df['date'])
+# Taux de rebond par client
+total_sessions = grouped_by_client['session number'].count()
+single_page_sessions = grouped_by_client.apply(lambda x: (x['exit pages'].count() == 1).sum())
+bounce_rate = (single_page_sessions / total_sessions) * 100
 
-# Groupement par mk id
-grouped_by_client = df.groupby('mk id')
+# Distribution des sessions par jour de la semaine
+df['day_of_week'] = df['date'].dt.dayofweek
+sessions_by_day = grouped_by_client['day_of_week'].value_counts().unstack(fill_value=0)
 
-# Parcourir chaque groupe (client)
-for client_id, client_data in grouped_by_client:
-    print(f"Analyse pour le client {client_id}:")
-    
-    # Analyse des destinations des visiteurs pour ce client
-    exit_pages_count = client_data['exit pages'].value_counts()
-    print("Destinations les plus populaires :")
-    print(exit_pages_count.head())
-    
-    # Analyse des pages d'entrée des visiteurs pour ce client
-    entry_pages_count = client_data['entry pages'].value_counts()
-    print("\nPages d'entrée les plus populaires :")
-    print(entry_pages_count.head())
-    
-    # Analyse des pages d'entrée du parcours client pour ce client
-    entry_db_journey_count = client_data['entry db_journey page'].value_counts()
-    print("\nPages d'entrée du parcours client les plus populaires :")
-    print(entry_db_journey_count.head())
-    
-    # Analyse des retours des visiteurs pour ce client
-    return_visits = client_data[client_data['session number'] > 1]
-    return_visits_count = return_visits['entry pages'].value_counts()
-    print("\nNombre de retours par page d'entrée pour ce client :")
-    print(return_visits_count)
-    print("\n----------------------\n")
+# Graphiques
+plt.figure(figsize=(12, 6))
+
+# Durée moyenne des visites par client
+plt.subplot(1, 3, 1)
+average_time_spent.plot(kind='bar', color='skyblue')
+plt.title('Durée moyenne des visites')
+plt.xlabel('Client ID')
+plt.ylabel('Durée moyenne (en secondes)')
+
+# Taux de rebond par client
+plt.subplot(1, 3, 2)
+bounce_rate.plot(kind='bar', color='salmon')
+plt.title('Taux de rebond')
+plt.xlabel('Client ID')
+plt.ylabel('Taux de rebond (%)')
+
+# Distribution des sessions par jour de la semaine
+plt.subplot(1, 3, 3)
+sessions_by_day.plot(kind='bar', stacked=True)
+plt.title('Distribution des sessions par jour de la semaine')
+plt.xlabel('Client ID')
+plt.ylabel('Nombre de sessions')
+plt.legend(['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'], loc='upper right')
+
+plt.tight_layout()
+plt.show()
