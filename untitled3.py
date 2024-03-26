@@ -1,8 +1,18 @@
-# Importer pandas
 import pandas as pd
 
-# Calculer le nombre total de sorties pour chaque type d'entrée de page
+# Supposons que df est le DataFrame avec lequel vous travaillez
+# df = pd.read_csv('votre_data.csv')
+
+# Calculer le nombre total de sorties pour chaque type de page d'entrée
 total_exit_counts = df['exit_page'].value_counts()
+
+# Définir une fonction pour obtenir les comptes de page de sortie
+def get_exit_page_counts(df, entry_pages, return_type):
+    # Filtrer le DataFrame en fonction des pages d'entrée et du type de retour
+    filtered_df = df[df['entry_page'].isin(entry_pages) & df['return_type'].isin(return_type)]
+    # Calculer les comptes de page de sortie
+    exit_page_counts = filtered_df['exit_page'].value_counts()
+    return exit_page_counts
 
 # Définir une fonction pour créer chaque dataset
 def create_dataset(entry_pages, return_type):
@@ -17,6 +27,11 @@ def create_dataset(entry_pages, return_type):
     return dataset
 
 # Créer les datasets
-return_visitors = create_dataset(['deposit', 'saving'], 'return')
-first_visitors = create_dataset(['deposit', 'saving'], 'first')
-all_visitors = create_dataset(['deposit', 'saving'], ['first', 'second'])
+return_visitors = create_dataset(['deposit', 'saving'], ['return'])
+first_visitors = create_dataset(['deposit', 'saving'], ['first'])
+all_visitors = create_dataset(['deposit', 'saving'], ['first', 'return'])
+
+# Imprimer les datasets
+print("Visiteurs de retour:\\n", return_visitors)
+print("\\nVisiteurs pour la première fois:\\n", first_visitors)
+print("\\nTous les visiteurs:\\n", all_visitors)
