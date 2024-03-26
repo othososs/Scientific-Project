@@ -1,16 +1,22 @@
-def get_exit_page_counts(df, entry_pages, return_type):
-    filtered_df = df[(df['entry_page'].isin(entry_pages)) & (df['return'] == return_type)]
-    exit_page_counts = filtered_df['exit_page'].value_counts()
-    return exit_page_counts
+# Importer pandas
+import pandas as pd
 
-# Deposit
-df_exit_page_deposit_first = get_exit_page_counts(df, ['deposit'], 'first')
-df_exit_page_deposit_second = get_exit_page_counts(df, ['deposit'], 'second')
+# Calculer le nombre total de sorties pour chaque type d'entrée de page
+total_exit_counts = df['exit_page'].value_counts()
 
-# Saving
-df_exit_page_saving_first = get_exit_page_counts(df, ['saving'], 'first')
-df_exit_page_saving_second = get_exit_page_counts(df, ['saving'], 'second')
+# Définir une fonction pour créer chaque dataset
+def create_dataset(entry_pages, return_type):
+    exit_page_counts = get_exit_page_counts(df, entry_pages, return_type)
+    percentage = exit_page_counts / total_exit_counts
+    dataset = pd.DataFrame({
+        'Exit_page_name': exit_page_counts.index,
+        'Number_of_exit': exit_page_counts.values,
+        'Percentage': percentage.values,
+        'Type_of_entry_page': ', '.join(entry_pages)
+    })
+    return dataset
 
-# All (Deposit and Saving)
-df_exit_page_all_first = get_exit_page_counts(df, ['deposit', 'saving'], 'first')
-df_exit_page_all_second = get_exit_page_counts(df, ['deposit', 'saving'], 'second')
+# Créer les datasets
+return_visitors = create_dataset(['deposit', 'saving'], 'return')
+first_visitors = create_dataset(['deposit', 'saving'], 'first')
+all_visitors = create_dataset(['deposit', 'saving'], ['first', 'second'])
