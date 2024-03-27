@@ -1,1 +1,1 @@
-Okay, I understand returning visitors better now, it's clearer. I'll make a few changes and send you the file. Thanks for your feedback
+Just for confirmation, I remember Claudie confirmed that we will consider both returning and first visitors, so there won't be any filter in this part
