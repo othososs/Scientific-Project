@@ -1,2 +1,1 @@
-    aligned_exit_page_counts, aligned_total_exit_counts = exit_page_counts.align(total_exit_counts, fill_value=0)
-    percentage = aligned_exit_page_counts / aligned_total_exit_counts
+Hey Catarina, I have a question. Regarding the percentage in the exit page table, normally it's the ratio between the number of exits from a site and the total number of exits. For the total number of exits, do you only consider deposits and savings or is it the sum of everything?
