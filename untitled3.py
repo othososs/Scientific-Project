@@ -1,1 +1,3 @@
-result['Percentage'] = result.groupby('entry_db_journey_page')['Number'].apply(lambda x: x / x.sum())
+J'ai finalisé le fichier des principales pages de sortie. Pour le premier fichier, tu vas trouver la page de sortie, le nombre de sorties, le pourcentage et la session (dépôts, épargne, Tout). Ce fichier sera alimenté sur PowerBI et inclura tous les types de visiteurs (première visite et visiteurs réguliers).
+
+Pour le deuxième fichier, j'ai appliqué un filtre uniquement aux visiteurs pour lesquels leur première visite a été effectuée via un dépôt ou une épargne. Lorsqu'ils reviennent, tu vas trouver la page d'entrée dans la colonne "session_type", et les autres variables sont les mêmes que celles que j'ai expliquées précédemment
