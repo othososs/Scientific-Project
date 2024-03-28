@@ -1,3 +1,3 @@
-J'ai finalisé le fichier des principales pages de sortie. Pour le premier fichier, tu vas trouver la page de sortie, le nombre de sorties, le pourcentage et la session (dépôts, épargne, Tout). Ce fichier sera alimenté sur PowerBI et inclura tous les types de visiteurs (première visite et visiteurs réguliers).
+Hello,
 
-Pour le deuxième fichier, j'ai appliqué un filtre uniquement aux visiteurs pour lesquels leur première visite a été effectuée via un dépôt ou une épargne. Lorsqu'ils reviennent, tu vas trouver la page d'entrée dans la colonne "session_type", et les autres variables sont les mêmes que celles que j'ai expliquées précédemment
+I finished the top exit page file and imported it into Power BI. It works, but we can't see the entire URL link. If you have time, could you please take a look to see if there's a way to optimize the space on the dashboard? Additionally, there's another issue: when we don't choose any filters, instead of getting all results, we get another result.
