@@ -1,47 +1,45 @@
 import numpy as np
-from bayes_opt import BayesianOptimization
-from sklearn.model_selection import cross_val_score
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from keras.models import Sequential
-from keras.layers import Dense, Dropout
-from keras.wrappers.scikit_learn import KerasClassifier
+from keras.layers import Dense, Dropout, BatchNormalization
+from keras.optimizers import Adam
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 
-# Load your data
-X_train, y_train, X_val, y_val = load_data()
+# Load your dataset
+data = pd.read_csv('your_dataset.csv')
+X = data.drop('target', axis=1).values
+y = data['target'].values
 
-# Define the hyperparameter space
-pbounds = {
-    'num_hidden_layers': (1, 5),
-    'num_neurons': (32, 512),
-    'dropout_rate': (0.0, 0.5),
-    'learning_rate': (1e-4, 1e-1),
-}
+# Split the dataset
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Define the objective function
-def objective(num_hidden_layers, num_neurons, dropout_rate, learning_rate):
-    def create_model():
-        model = Sequential()
-        model.add(Dense(num_neurons, input_dim=X_train.shape[1], activation='relu'))
-        model.add(Dropout(dropout_rate))
-        for _ in range(int(num_hidden_layers) - 1):
-            model.add(Dense(num_neurons, activation='relu'))
-            model.add(Dropout(dropout_rate))
-        model.add(Dense(1, activation='sigmoid'))
-        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-        return model
+# Normalize the data
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_val = scaler.transform(X_val)
 
-    model = KerasClassifier(build_fn=create_model, epochs=100, batch_size=32, verbose=0)
-    scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
-    return -np.mean(scores)  # We want to maximize accuracy, so we return the negative mean
+# Define the neural network architecture
+model = Sequential()
+model.add(Dense(128, input_dim=X_train.shape[1], activation='relu'))
+model.add(BatchNormalization())
+model.add(Dropout(0.3))
+model.add(Dense(64, activation='relu'))
+model.add(BatchNormalization())
+model.add(Dropout(0.2))
+model.add(Dense(1, activation='sigmoid'))
 
-# Optimize hyperparameters
-optimizer = BayesianOptimization(
-    f=objective,
-    pbounds=pbounds,
-    random_state=42,
-)
+# Compile the model
+optimizer = Adam(lr=0.001)
+model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
-optimizer.maximize(init_points=5, n_iter=100)
+# Set up callbacks
+early_stop = EarlyStopping(monitor='val_loss', patience=10)
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, min_lr=1e-6)
 
-# Print the best hyperparameters
-print("Best hyperparameters:")
-print(optimizer.max)
+# Train the model
+batch_size = 1024
+epochs = 100
+model.fit(X_train, y_train, batch_size=batch_size, epochs=epochs,
+          validation_data=(X_val, y_val), callbacks=[early_stop, reduce_lr])
