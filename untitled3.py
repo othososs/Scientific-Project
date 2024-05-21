@@ -1,40 +1,37 @@
 import numpy as np
-from xgboost import XGBClassifier
 from bayes_opt import BayesianOptimization
+from sklearn.model_selection import cross_val_score
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.wrappers.scikit_learn import KerasClassifier
 
 # Load your data
 X_train, y_train, X_val, y_val = load_data()
 
 # Define the hyperparameter space
 pbounds = {
-    'max_depth': (3, 16),
-    'min_child_weight': (1, 10),
-    'gamma': (0.0, 1.0),
-    'reg_alpha': (0.0, 1.0),
-    'reg_lambda': (0.0, 1.0),
-    'colsample_bytree': (0.5, 1.0),
-    'subsample': (0.5, 1.0),
-    'learning_rate': (0.01, 0.5),
+    'num_hidden_layers': (1, 5),
+    'num_neurons': (32, 512),
+    'dropout_rate': (0.0, 0.5),
+    'learning_rate': (1e-4, 1e-1),
 }
 
 # Define the objective function
-def objective(max_depth, min_child_weight, gamma, reg_alpha, reg_lambda, colsample_bytree, subsample, learning_rate):
-    model = XGBClassifier(
-        max_depth=int(max_depth),
-        min_child_weight=min_child_weight,
-        gamma=gamma,
-        reg_alpha=reg_alpha,
-        reg_lambda=reg_lambda,
-        colsample_bytree=colsample_bytree,
-        subsample=subsample,
-        learning_rate=learning_rate,
-        n_estimators=1000,
-        verbos e=0
-    )
+def objective(num_hidden_layers, num_neurons, dropout_rate, learning_rate):
+    def create_model():
+        model = Sequential()
+        model.add(Dense(num_neurons, input_dim=X_train.shape[1], activation='relu'))
+        model.add(Dropout(dropout_rate))
+        for _ in range(int(num_hidden_layers) - 1):
+            model.add(Dense(num_neurons, activation='relu'))
+            model.add(Dropout(dropout_rate))
+        model.add(Dense(1, activation='sigmoid'))
+        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+        return model
 
-    model.fit(X_train, y_train, eval_set=[(X_val, y_val)], early_stopping_rounds=50, eval_metric='logloss')
-    score = model.best_score
-    return score
+    model = KerasClassifier(build_fn=create_model, epochs=100, batch_size=32, verbose=0)
+    scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
+    return -np.mean(scores)  # We want to maximize accuracy, so we return the negative mean
 
 # Optimize hyperparameters
 optimizer = BayesianOptimization(
