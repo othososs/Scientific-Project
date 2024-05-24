@@ -1,74 +1,49 @@
-import pandas as pd
-from catboost import CatBoostClassifier
-from sklearn.model_selection import train_test_split
-from bayes_opt import BayesianOptimization
+import lightgbm as lgb
+from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
+from sklearn.metrics import roc_auc_score
+import numpy as np
 
-# Load your data
-data = pd.read_csv('your_data.csv')
-X = data.drop('target_column', axis=1)
-y = data['target_column']
+# Votre fonction lgbm_cv_evaluator
+def lgbm_cv_evaluator(params):
+    lgbm_dataset = lgb.Dataset(data=X_train, label=y_train)
+    
+    # Fixation des paramètres de base et ajout des paramètres à optimiser
+    params['objective'] = 'binary'
+    params['metric'] = 'auc'
+    params['verbose'] = -1
 
-# Split the data into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # Entraînement du modèle avec cross-validation
+    cv_results = lgb.cv(
+        params,
+        lgbm_dataset,
+        num_boost_round=1000,
+        nfold=5,
+        early_stopping_rounds=50,
+        seed=42
+    )
 
-# Split the training data into train and validation sets
-X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
+    # Calcul de la métrique de performance à maximiser
+    mean_auc = np.max(cv_results['auc-mean'])
+    return {'loss': -mean_auc, 'status': STATUS_OK}
 
-# Define the Bayesian Optimization function
-def catboost_cv(max_depth,
-               learning_rate,
-               l2_leaf_reg,
-               bagging_temperature,
-               random_strength):
+# Définir l'espace de recherche des hyperparamètres
+space = {
+    'num_leaves': hp.choice('num_leaves', range(20, 150)),
+    'max_depth': hp.choice('max_depth', range(5, 30)),
+    'learning_rate': hp.uniform('learning_rate', 0.01, 0.3),
+    'subsample': hp.uniform('subsample', 0.5, 1.0),
+    'colsample_bytree': hp.uniform('colsample_bytree', 0.5, 1.0),
+    'min_child_weight': hp.uniform('min_child_weight', 0.1, 10),
+    'lambda_l1': hp.uniform('lambda_l1', 0.0, 1.0),  # Régularisation L1
+    'lambda_l2': hp.uniform('lambda_l2', 0.0, 1.0)   # Régularisation L2
+}
 
-   # Create the CatBoost classifier
-   model = CatBoostClassifier(max_depth=int(max_depth),
-                              learning_rate=learning_rate,
-                              l2_leaf_reg=l2_leaf_reg,
-                              bagging_temperature=bagging_temperature,
-                              random_strength=random_strength,
-                              eval_metric='Accuracy',
-                              verbose=False)
+# Lancer l'optimisation bayésienne
+trials = Trials()
+best = fmin(fn=lgbm_cv_evaluator,
+            space=space,
+            algo=tpe.suggest,
+            max_evals=100,
+            trials=trials)
 
-   # Fit the model on the training data and evaluate on the validation data
-   model.fit(X_train, y_train, eval_set=(X_val, y_val), use_best_model=True, plot=False)
-
-   # Get the best validation score
-   best_score = max(model.evals_result_['validation']['Accuracy'])
-
-   return best_score
-
-# Define the search space for the hyperparameters
-pbounds = {'max_depth': (2, 10),
-          'learning_rate': (0.01, 0.5),
-          'l2_leaf_reg': (0.1, 10),
-          'bagging_temperature': (0.1, 1.0),
-          'random_strength': (0.1, 1.0)}
-
-# Initialize the Bayesian Optimizer
-optimizer = BayesianOptimization(f=catboost_cv,
-                                pbounds=pbounds,
-                                random_state=42,
-                                verbose=2)
-
-# Optimize the hyperparameters
-optimizer.maximize(init_points=5, n_iter=25)
-
-# Get the best hyperparameters
-best_params = optimizer.max['params']
-
-# Train the final model with the best hyperparameters
-final_model = CatBoostClassifier(max_depth=int(best_params['max_depth']),
-                                learning_rate=best_params['learning_rate'],
-                                l2_leaf_reg=best_params['l2_leaf_reg'],
-                                bagging_temperature=best_params['bagging_temperature'],
-                                random_strength=best_params['random_strength'],
-                                eval_metric='Accuracy',
-                                verbose=False)
-
-# Fit the final model on the entire training data
-final_model.fit(X_train, y_train, eval_set=(X_val, y_val), use_best_model=True, plot=True)
-
-# Evaluate the final model on the test set
-test_accuracy = final_model.score(X_test, y_test)
-print(f'Test Accuracy: {test_accuracy}')
+print("Meilleurs hyperparamètres trouvés: ", best)
