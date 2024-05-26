@@ -1,89 +1,67 @@
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import roc_auc_score
-from hyperopt import fmin, tpe, hp, STATUS_OK, Trials
 import numpy as np
-import pickle
-import fsspec
-import os
+import xgboost as xgb
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import cross_val_score
+from bayes_opt import BayesianOptimization
 
-# Supposez que X_train et y_train sont déjà définis
+# Chargement des données (exemple avec le jeu de données Breast Cancer)
+data = load_breast_cancer()
+X, y = data.data, data.target
 
-# Séparation des données en ensembles d'entraînement et de validation
-X_train_split, X_valid_split, y_train_split, y_valid_split = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
+# Liste pour stocker les scores à chaque étape
+history = []
 
-global_iteration = 0
+# Définition de la fonction objectif pour l'optimisation bayésienne
+def xgb_cv(max_depth, learning_rate, n_estimators, gamma, min_child_weight, subsample, colsample_bytree):
+    params = {
+        'objective': 'binary:logistic',
+        'eval_metric': 'auc',               # Utiliser ROC AUC comme métrique d'évaluation
+        'max_depth': int(max_depth),
+        'learning_rate': learning_rate,
+        'n_estimators': int(n_estimators),
+        'gamma': gamma,
+        'min_child_weight': min_child_weight,
+        'subsample': subsample,
+        'colsample_bytree': colsample_bytree,
+        'nthread': -1,
+        'seed': 42
+    }
 
-def rf_cv_evaluator(params):
-    global global_iteration
-    global_iteration += 1
+    # Initialiser le modèle XGBoost avec les paramètres donnés
+    xgb_model = xgb.XGBClassifier(**params)
+
+    # Effectuer une validation croisée pour évaluer les performances du modèle
+    cv_scores = cross_val_score(xgb_model, X, y, cv=5, scoring='roc_auc')
+    mean_cv_score = np.mean(cv_scores)
     
-    model = RandomForestClassifier(**params, random_state=42, n_jobs=-1)
-    model.fit(X_train_split, y_train_split)
-    
-    # Évaluer sur l'ensemble d'entraînement
-    train_preds = model.predict_proba(X_train_split)[:, 1]
-    train_auc = roc_auc_score(y_train_split, train_preds)
-    
-    # Évaluer sur l'ensemble de validation
-    valid_preds = model.predict_proba(X_valid_split)[:, 1]
-    valid_auc = roc_auc_score(y_valid_split, valid_preds)
-    
-    print(f"Iteration {global_iteration}: Train AUC = {train_auc}, Valid AUC = {valid_auc}, Params = {params}")
-    
-    return {'loss': -valid_auc, 'status': STATUS_OK, 'params': params}
+    # Ajouter le score à l'historique
+    history.append(mean_cv_score)
 
-space = {
-    'n_estimators': hp.choice('n_estimators', range(50, 300)),
-    'max_depth': hp.choice('max_depth', range(5, 30)),
-    'min_samples_split': hp.choice('min_samples_split', range(2, 20)),
-    'min_samples_leaf': hp.choice('min_samples_leaf', range(1, 20)),
-    'max_features': hp.choice('max_features', ['sqrt', 'log2', None]),
-    'bootstrap': hp.choice('bootstrap', [True, False])
-}
+    # Retourner la moyenne des scores de validation croisée (la fonction objectif doit être maximisée)
+    return mean_cv_score
 
-trials = Trials()
-best = fmin(fn=rf_cv_evaluator,
-            space=space,
-            algo=tpe.suggest,
-            max_evals=50,
-            trials=trials)
+# Définition de la fonction de rappel pour suivre la performance à chaque étape
+def on_step(optim_result):
+    print("Step %d - ROC AUC: %f" % (len(history), optim_result['target']))
 
-# Entraîner le modèle avec les meilleurs hyperparamètres trouvés
-best_params = trials.best_trial['result']['params']
+# Définition de l'espace de recherche des hyperparamètres
+xgb_bo = BayesianOptimization(
+    xgb_cv,
+    {
+        'max_depth': (3, 10),              # Profondeur maximale de l'arbre
+        'learning_rate': (0.01, 0.3),      # Taux d'apprentissage
+        'n_estimators': (50, 500),         # Nombre d'arbres
+        'gamma': (0, 1),                   # Valeur de réduction de perte minimale pour effectuer une division
+        'min_child_weight': (1, 10),       # Poids minimal nécessaire pour créer un nouveau nœud dans l'arbre
+        'subsample': (0.5, 1),             # Fraction d'échantillons à utiliser lors de la construction de chaque arbre
+        'colsample_bytree': (0.5, 1)       # Fraction de caractéristiques à utiliser lors de la construction de chaque arbre
+    },
+    random_state=42,
+    verbose=1
+)
 
-print("Meilleurs hyperparamètres trouvés: ", best_params)
+# Exécution de l'optimisation bayésienne en suivant la performance à chaque étape
+xgb_bo.maximize(init_points=10, n_iter=20, acq="ei", xi=0.01, callback=on_step)
 
-model = RandomForestClassifier(**best_params, random_state=42, n_jobs=-1)
-model.fit(X_train_split, y_train_split)
-
-# Sauvegarder le modèle et les meilleurs hyperparamètres
-path_saving = 'path/to/cloud/directory'
-
-# Sauvegarder le modèle Random Forest
-with fsspec.open(os.path.join(path_saving, 'random_forest_model.pkl'), 'wb') as f:
-    pickle.dump(model, f)
-
-# Sauvegarder les meilleurs hyperparamètres
-with fsspec.open(os.path.join(path_saving, 'best_rf_params.pkl'), 'wb') as f:
-    pickle.dump(best_params, f)
-
-print("Modèle et hyperparamètres sauvegardés avec succès.")
-
-# Charger le modèle et les hyperparamètres
-with fsspec.open(os.path.join(path_saving, 'random_forest_model.pkl'), 'rb') as f:
-    model = pickle.load(f)
-
-with fsspec.open(os.path.join(path_saving, 'best_rf_params.pkl'), 'rb') as f:
-    best_params = pickle.load(f)
-
-print("Modèle et paramètres chargés avec succès.")
-print("Meilleurs hyperparamètres: ", best_params)
-
-# Vérifier l'overfitting
-train_preds = model.predict_proba(X_train_split)[:, 1]
-train_auc = roc_auc_score(y_train_split, train_preds)
-valid_preds = model.predict_proba(X_valid_split)[:, 1]
-valid_auc = roc_auc_score(y_valid_split, valid_preds)
-
-print(f"Performance finale - Train AUC: {train_auc}, Valid AUC: {valid_auc}")
+# Afficher les meilleurs paramètres
+print(xgb_bo.max)
