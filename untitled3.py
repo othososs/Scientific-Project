@@ -1,5 +1,6 @@
 import xgboost as xgb
 from bayes_opt import BayesianOptimization
+from bayes_opt.util import UtilityFunction
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
@@ -47,6 +48,10 @@ pbounds = {'max_depth': (3, 15), 'gamma': (0, 1), 'min_child_weight': (1, 10),
 # Initialiser l'optimiseur bayésien
 optimizer = BayesianOptimization(f=xgb_eval, pbounds=pbounds, random_state=42)
 
+# Définir la fonction d'acquisition (ici, nous utilisons la fonction EI par défaut)
+utility_function = UtilityFunction(kind='ei', xi=0.0)
+optimizer.set_gp_params(utility_function.gp_params)  # Définir les paramètres du processus gaussien
+
 # Fonction de rappel pour suivre l'évolution à chaque itération
 def print_iter_callback(iter_num, max_val, max_params, max_iter):
     print(f"Itération {iter_num}/{max_iter}: roc_auc = {max_val:.4f}, paramètres = {max_params}")
@@ -55,9 +60,7 @@ def print_iter_callback(iter_num, max_val, max_params, max_iter):
 optimizer.maximize(
     init_points=5,
     n_iter=25,
-    acq='ei',
-    acq_func_kwargs={'xi': 0.0},
-    gp_params=None,
+    acq=utility_function.utility,
     callback=print_iter_callback,
     callback_kwargs={'max_iter': 25}
 )
