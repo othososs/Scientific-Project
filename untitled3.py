@@ -1,67 +1,41 @@
-import numpy as np
 import xgboost as xgb
-from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import cross_val_score
 from bayes_opt import BayesianOptimization
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
 
-# Chargement des données (exemple avec le jeu de données Breast Cancer)
-data = load_breast_cancer()
-X, y = data.data, data.target
+# Sous-échantillonner un sous-ensemble des données pour l'optimisation
+X_train_opt, X_val, y_train_opt, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
 
-# Liste pour stocker les scores à chaque étape
-history = []
-
-# Définition de la fonction objectif pour l'optimisation bayésienne
-def xgb_cv(max_depth, learning_rate, n_estimators, gamma, min_child_weight, subsample, colsample_bytree):
-    params = {
-        'objective': 'binary:logistic',
-        'eval_metric': 'auc',               # Utiliser ROC AUC comme métrique d'évaluation
-        'max_depth': int(max_depth),
-        'learning_rate': learning_rate,
-        'n_estimators': int(n_estimators),
-        'gamma': gamma,
-        'min_child_weight': min_child_weight,
-        'subsample': subsample,
-        'colsample_bytree': colsample_bytree,
-        'nthread': -1,
-        'seed': 42
-    }
-
-    # Initialiser le modèle XGBoost avec les paramètres donnés
-    xgb_model = xgb.XGBClassifier(**params)
-
-    # Effectuer une validation croisée pour évaluer les performances du modèle
-    cv_scores = cross_val_score(xgb_model, X, y, cv=5, scoring='roc_auc')
-    mean_cv_score = np.mean(cv_scores)
+# Fonction d'évaluation pour l'optimisation bayésienne
+def xgb_eval(max_depth, gamma, min_child_weight, subsample, colsample_bytree):
+    model = xgb.XGBClassifier(max_depth=int(max_depth),
+                               gamma=gamma,
+                               min_child_weight=min_child_weight,
+                               subsample=subsample,
+                               colsample_bytree=colsample_bytree,
+                               objective='binary:logistic',
+                               eval_metric='auc',
+                               random_state=42,
+                               n_jobs=-1)  # Parallélisation sur tous les cœurs disponibles
     
-    # Ajouter le score à l'historique
-    history.append(mean_cv_score)
+    # Entraîner le modèle sur les données d'optimisation
+    model.fit(X_train_opt, y_train_opt)
+    
+    # Évaluer le roc_auc sur les données de validation
+    roc_auc = roc_auc_score(y_val, model.predict_proba(X_val)[:, 1])
+    
+    return roc_auc
 
-    # Retourner la moyenne des scores de validation croisée (la fonction objectif doit être maximisée)
-    return mean_cv_score
+# Définir les espaces de recherche pour les hyperparamètres
+pbounds = {'max_depth': (3, 15), 'gamma': (0, 1), 'min_child_weight': (1, 10),
+           'subsample': (0.5, 1), 'colsample_bytree': (0.5, 1)}
 
-# Définition de la fonction de rappel pour suivre la performance à chaque étape
-def on_step(optim_result):
-    print("Step %d - ROC AUC: %f" % (len(history), optim_result['target']))
+# Initialiser l'optimiseur bayésien
+optimizer = BayesianOptimization(f=xgb_eval, pbounds=pbounds, random_state=42)
 
-# Définition de l'espace de recherche des hyperparamètres
-xgb_bo = BayesianOptimization(
-    xgb_cv,
-    {
-        'max_depth': (3, 10),              # Profondeur maximale de l'arbre
-        'learning_rate': (0.01, 0.3),      # Taux d'apprentissage
-        'n_estimators': (50, 500),         # Nombre d'arbres
-        'gamma': (0, 1),                   # Valeur de réduction de perte minimale pour effectuer une division
-        'min_child_weight': (1, 10),       # Poids minimal nécessaire pour créer un nouveau nœud dans l'arbre
-        'subsample': (0.5, 1),             # Fraction d'échantillons à utiliser lors de la construction de chaque arbre
-        'colsample_bytree': (0.5, 1)       # Fraction de caractéristiques à utiliser lors de la construction de chaque arbre
-    },
-    random_state=42,
-    verbose=1
-)
+# Optimiser les hyperparamètres
+optimizer.maximize(init_points=5, n_iter=25, acq='ei', xi=0.0)
 
-# Exécution de l'optimisation bayésienne en suivant la performance à chaque étape
-xgb_bo.maximize(init_points=10, n_iter=20, acq="ei", xi=0.01, callback=on_step)
-
-# Afficher les meilleurs paramètres
-print(xgb_bo.max)
+# Obtenir les meilleurs hyperparamètres
+best_params = optimizer.max['params']
+print("Meilleurs hyperparamètres : ", best_params)
