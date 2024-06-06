@@ -1,21 +1,8 @@
-from imblearn.over_sampling import SMOTE
-from collections import Counter
+Here is a summary of what I found:
+The best ways to balance the data are to use class weighting in the LGBM model to give more importance to minority classes. We can use the under-sampling method, which involves reducing the majority class to have, for example, 1000 instances of class 0 and 1000 instances of class 1. There is a method called SMOTE, which produces more occurrences for the minority class, but apparently, there is negative feedback on this method. The goal is to choose a good method to also avoid overfitting.
 
-# Séparation des données
-X = data.drop('target', axis=1)
-y = data['target']
 
-# Rapport désiré entre les classes minoritaire et majoritaire
-# Par exemple, 0.5 signifie que le nombre d'instances de la classe minoritaire
-# sera égal à la moitié du nombre d'instances de la classe majoritaire
-desired_ratio = 0.5
 
-# Initialisation de SMOTE avec le rapport désiré
-smote = SMOTE(sampling_strategy=desired_ratio, random_state=42)
 
-# Application de SMOTE
-X_resampled, y_resampled = smote.fit_resample(X, y)
 
-# Affichage de la nouvelle répartition des classes
-print('Répartition des classes initiale :', Counter(y))
-print('Répartition des classes après SMOTE :', Counter(y_resampled))
+
