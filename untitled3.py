@@ -1,17 +1,21 @@
-from collections import Counter
 from imblearn.over_sampling import SMOTE
-import numpy as np
+from collections import Counter
 
-# Separate features (X) and target variable (y)
+# Séparation des données
 X = data.drop('target', axis=1)
 y = data['target']
 
-# Initialize SMOTE
-smote = SMOTE(random_state=42)
+# Rapport désiré entre les classes minoritaire et majoritaire
+# Par exemple, 0.5 signifie que le nombre d'instances de la classe minoritaire
+# sera égal à la moitié du nombre d'instances de la classe majoritaire
+desired_ratio = 0.5
 
-# Perform SMOTE
+# Initialisation de SMOTE avec le rapport désiré
+smote = SMOTE(sampling_strategy=desired_ratio, random_state=42)
+
+# Application de SMOTE
 X_resampled, y_resampled = smote.fit_resample(X, y)
 
-# Print the new class distribution
-print('Original dataset shape:', Counter(y))
-print('Resampled dataset shape:', Counter(y_resampled))
+# Affichage de la nouvelle répartition des classes
+print('Répartition des classes initiale :', Counter(y))
+print('Répartition des classes après SMOTE :', Counter(y_resampled))
