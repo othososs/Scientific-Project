@@ -1,66 +1,30 @@
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from catboost import CatBoostClassifier
-from hyperopt import hp, fmin, tpe, STATUS_OK, Trials
-from sklearn.metrics import accuracy_score
+Subject: Summary of Weekly Report - Week 24 (June 9 to June 15, 2024)
 
-# Supposons que vous ayez vos données chargées en X (caractéristiques) et y (cible)
+Hello everyone,
 
-# Diviser les données en ensembles d'entraînement et de test
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+I hope you are doing well.
 
-# Définir la fonction objective pour le réglage des hyperparamètres
-def objective(params):
-    params = {'depth': int(params['depth']),
-              'l2_leaf_reg': params['l2_leaf_reg'],
-              'learning_rate': params['learning_rate'],
-              'bagging_temperature': params['bagging_temperature'],
-              'random_strength': params['random_strength'],
-              'border_count': int(round(params['border_count']))}
-    
-    model = CatBoostClassifier(**params, iterations=1000, random_state=42)
-    model.fit(X_train, y_train, eval_set=(X_test, y_test), early_stopping_rounds=50, verbose=False)
-    
-    y_pred = model.predict(X_test)
-    score = accuracy_score(y_test, y_pred)
-    
-    return {'loss': -score, 'status': STATUS_OK}
+Please find attached the weekly report for Week 24, covering the period from June 9 to June 15, 2024. Here are the key notable variations:
 
-# Définir l'espace de recherche pour les hyperparamètres
-space = {'depth': hp.quniform('depth', 2, 10, 1),
-         'l2_leaf_reg': hp.uniform('l2_leaf_reg', 1e-5, 10),
-         'learning_rate': hp.loguniform('learning_rate', np.log(0.01), np.log(0.5)),
-         'bagging_temperature': hp.uniform('bagging_temperature', 0.1, 1.0),
-         'random_strength': hp.uniform('random_strength', 0.1, 1.0),
-         'border_count': hp.quniform('border_count', 32, 512, 1)}
+Web Onboarding - Current Accounts:
 
-# Effectuer l'optimisation bayésienne
-trials = Trials()
-best = fmin(fn=objective, space=space, algo=tpe.suggest, max_evals=100, trials=trials)
+Completed solicitations - CA: +33%
+Start of contracts: +32%
+Conversion rate remains almost constant compared to previous weeks, at approximately 26%
+Onboarding - Fixed Term Deposits:
 
-# Imprimer les meilleurs hyperparamètres
-print('Meilleurs hyperparamètres:')
-print(best)
+Variation in start of contracts: -8%
+Variation in end of contracts: -8%
+Conversion rate this week: 9%
+App Onboarding - Current Accounts:
 
-# Obtenez les meilleurs hyperparamètres de l'optimisation bayésienne
-best_params = best
+Start of contracts: -17%
+Approved variations: +80%
+App Onboarding - Savings Accounts:
 
-# Convertissez les hyperparamètres en types appropriés
-best_params_int = {
-    'depth': int(best_params['depth']),
-    'border_count': int(round(best_params['border_count'])),
-    'l2_leaf_reg': best_params['l2_leaf_reg'],
-    'learning_rate': best_params['learning_rate'],
-    'bagging_temperature': best_params['bagging_temperature'],
-    'random_strength': best_params['random_strength']
-}
+Current Account contracts: -17%
+Selected savings accounts: +10%
+Non-selected savings accounts: +32%
+For more details, please refer to the attached PDF report. Do not hesitate to contact us if you have any questions.
 
-# Entraînez le modèle avec les meilleurs hyperparamètres (types appropriés)
-model = CatBoostClassifier(**best_params_int, iterations=1000, random_state=42)
-model.fit(X_train, y_train, eval_set=(X_test, y_test), early_stopping_rounds=50, verbose=False)
-
-# Évaluez le modèle sur l'ensemble de test
-y_pred = model.predict(X_test)
-accuracy = accuracy_score(y_test, y_pred)
-print(f'Précision sur l\'ensemble de test: {accuracy:.4f}')
+Best regards,
