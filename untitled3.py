@@ -1,55 +1,62 @@
-import optuna
+import pandas as pd
 import lightgbm as lgb
+from sklearn.metrics import f1_score, make_scorer
+from sklearn.model_selection import train_test_split
+from skopt import BayesSearchCV
+from skopt.space import Real, Integer
 import numpy as np
-from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import roc_auc_score
 
-def objective(trial, X, y, n_splits=5):
-    params = {
-        'objective': 'binary',
-        'metric': 'auc',
-        'boosting_type': 'gbdt',
-        'num_leaves': trial.suggest_int('num_leaves', 10, 100),
-        'learning_rate': trial.suggest_loguniform('learning_rate', 1e-3, 0.1),
-        'feature_fraction': trial.suggest_uniform('feature_fraction', 0.5, 1.0),
-        'lambda_l1': trial.suggest_loguniform('lambda_l1', 1e-8, 10.0),
-        'lambda_l2': trial.suggest_loguniform('lambda_l2', 1e-8, 10.0),
-        'scale_pos_weight': trial.suggest_loguniform('scale_pos_weight', 1, 100)  # Changé à loguniform
-    }
-    
-    cv = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
-    scores = []
-    
-    for train_idx, valid_idx in cv.split(X, y):
-        X_train, X_valid = X[train_idx], X[valid_idx]
-        y_train, y_valid = y[train_idx], y[valid_idx]
-        
-        model = lgb.LGBMClassifier(**params)
-        model.fit(
-            X_train, y_train,
-            eval_set=[(X_valid, y_valid)],
-            early_stopping_rounds=50,
-            verbose=0
-        )
-        
-        y_pred = model.predict_proba(X_valid)[:, 1]
-        score = roc_auc_score(y_valid, y_pred)
-        scores.append(score)
-    
-    return np.mean(scores)
+# Load data
+data = pd.read_csv('your_dataset.csv')
 
-def optimize_lgbm(X, y, n_trials=100):
-    study = optuna.create_study(direction='maximize')
-    study.optimize(lambda trial: objective(trial, X, y), n_trials=n_trials)
-    
-    return study.best_params, study.best_value
+# Basic preprocessing
+X = data.drop(columns=['target'])
+y = data['target']
 
-# Exemple d'utilisation
-# X, y = load_your_data()  # Chargez vos données ici
-# best_params, best_score = optimize_lgbm(X, y)
-# print(f"Meilleurs paramètres : {best_params}")
-# print(f"Meilleur score AUC-ROC : {best_score}")
+# Split the data into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
-# Entraînement du modèle final
-# final_model = lgb.LGBMClassifier(**best_params)
-# final_model.fit(X, y)
+# Define the F1 score as the metric
+f1 = make_scorer(f1_score)
+
+# Initialize the LightGBM classifier
+lgb_model = lgb.LGBMClassifier(objective='binary', n_jobs=-1, random_state=42)
+
+# Define the parameter space
+param_space = {
+    'num_leaves': Integer(20, 100),
+    'learning_rate': Real(0.01, 0.2, prior='log-uniform'),
+    'n_estimators': Integer(50, 500),
+    'scale_pos_weight': Real(np.sum(y == 0) / np.sum(y == 1), np.sum(y == 0) / np.sum(y == 1)),
+    'max_depth': Integer(3, 15),
+    'min_child_samples': Integer(10, 100),
+    'colsample_bytree': Real(0.6, 1.0),
+    'subsample': Real(0.6, 1.0),
+    'reg_alpha': Real(1e-8, 10.0, prior='log-uniform'),
+    'reg_lambda': Real(1e-8, 10.0, prior='log-uniform')
+}
+
+# Create the BayesSearchCV object
+bayes_search = BayesSearchCV(estimator=lgb_model, search_spaces=param_space, 
+                             scoring=f1, cv=3, n_iter=50, verbose=2, random_state=42, n_jobs=-1)
+
+# Fit the model and print progress
+print("Starting Bayesian optimization...")
+bayes_search.fit(X_train, y_train)
+print("Bayesian optimization complete.")
+
+# Get the best model from the BayesSearchCV
+best_model = bayes_search.best_estimator_
+
+# Predict on the test set
+y_pred = best_model.predict(X_test)
+
+# Calculate the F1 score
+f1_test = f1_score(y_test, y_pred)
+print(f"F1 Score on the test set: {f1_test:.4f}")
+
+# Get the best hyperparameters
+best_params = bayes_search.best_params_
+print("Best Hyperparameters found by Bayesian optimization:")
+for param_name in sorted(best_params.keys()):
+    print(f"{param_name}: {best_params[param_name]}")
