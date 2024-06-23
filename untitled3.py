@@ -1,70 +1,96 @@
-import pandas as pd
-import lightgbm as lgb
-from sklearn.metrics import f1_score
-from sklearn.model_selection import train_test_split
-from skopt import Optimizer
-from skopt.space import Real, Integer
-from skopt.utils import use_named_args
 import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import f1_score
+from lightgbm import LGBMClassifier
+from sklearn.preprocessing import StandardScaler
+from bayes_opt import BayesianOptimization
 
-# Load data
-data = pd.read_csv('your_dataset.csv')
+# Load your dataset (replace this with your actual data loading code)
+# Assuming X is your feature matrix and y is your target variable
+# X = pd.read_csv('your_dataset.csv')
+# y = X.pop('target_column')
 
-# Basic preprocessing
-X = data.drop(columns=['target'])
-y = data['target']
+# For demonstration purposes, let's create a dummy dataset
+np.random.seed(42)
+X = np.random.rand(8000000, 10)  # 8 million rows, 10 features
+y = np.random.choice([0, 1], size=8000000, p=[0.95, 0.05])  # Imbalanced dataset: 95% class 0, 5% class 1
 
-# Split the data into train and test sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Define the search space
-search_space = [
-    Integer(20, 100, name='num_leaves'),
-    Real(0.01, 0.2, prior='log-uniform', name='learning_rate'),
-    Integer(50, 500, name='n_estimators'),
-    Real(np.sum(y == 0) / np.sum(y == 1), np.sum(y == 0) / np.sum(y == 1), name='scale_pos_weight'),
-    Integer(3, 15, name='max_depth'),
-    Integer(10, 100, name='min_child_samples'),
-    Real(0.6, 1.0, name='colsample_bytree'),
-    Real(0.6, 1.0, name='subsample'),
-    Real(1e-8, 10.0, prior='log-uniform', name='reg_alpha'),
-    Real(1e-8, 10.0, prior='log-uniform', name='reg_lambda')
-]
+# Scale the features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Calculate scale_pos_weight
+scale_pos_weight = np.sum(y_train == 0) / np.sum(y_train == 1)
+
+def lgb_f1_score(n_estimators, max_depth, learning_rate, num_leaves, min_child_samples, subsample, colsample_bytree, scale_pos_weight_mult):
+    params = {
+        'n_estimators': int(n_estimators),
+        'max_depth': int(max_depth),
+        'learning_rate': learning_rate,
+        'num_leaves': int(num_leaves),
+        'min_child_samples': int(min_child_samples),
+        'subsample': max(min(subsample, 1), 0),
+        'colsample_bytree': max(min(colsample_bytree, 1), 0),
+        'scale_pos_weight': scale_pos_weight * scale_pos_weight_mult,
+        'random_state': 42
+    }
+    
+    model = LGBMClassifier(**params)
+    model.fit(X_train_scaled, y_train)
+    predictions = model.predict(X_test_scaled)
+    return f1_score(y_test, predictions)
+
+# Define the parameter space
+pbounds = {
+    'n_estimators': (100, 1000),
+    'max_depth': (3, 10),
+    'learning_rate': (0.01, 0.3),
+    'num_leaves': (20, 200),
+    'min_child_samples': (1, 100),
+    'subsample': (0.5, 1.0),
+    'colsample_bytree': (0.5, 1.0),
+    'scale_pos_weight_mult': (0.5, 2.0)
+}
 
 # Initialize the optimizer
-opt = Optimizer(search_space, random_state=42)
+optimizer = BayesianOptimization(
+    f=lgb_f1_score,
+    pbounds=pbounds,
+    random_state=42,
+    verbose=2
+)
 
-# Objective function to minimize
-@use_named_args(search_space)
-def objective(**params):
-    model = lgb.LGBMClassifier(objective='binary', n_jobs=-1, random_state=42, **params)
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    return -f1_score(y_test, y_pred)  # negative because we want to maximize F1
+# Run the optimization
+optimizer.maximize(init_points=5, n_iter=50)
 
-# Perform optimization
-n_iter = 50
-for i in range(n_iter):
-    next_point = opt.ask()
-    f_val = objective(**dict(zip([dim.name for dim in search_space], next_point)))
-    opt.tell(next_point, f_val)
-    print(f"Iteration {i+1}/{n_iter} - F1 Score: {-f_val:.4f}")
-
-# Get the best parameters
-best_params = opt.get_result().x
-best_params_dict = dict(zip([dim.name for dim in search_space], best_params))
-
-print("Best Hyperparameters found by Bayesian optimization:")
-for param_name in sorted(best_params_dict.keys()):
-    print(f"{param_name}: {best_params_dict[param_name]}")
+# Print the best parameters and score
+print("Best parameters:", optimizer.max['params'])
+print("Best F1 score:", optimizer.max['target'])
 
 # Train the final model with the best parameters
-best_model = lgb.LGBMClassifier(objective='binary', n_jobs=-1, random_state=42, **best_params_dict)
-best_model.fit(X_train, y_train)
+best_params = optimizer.max['params']
+best_params['n_estimators'] = int(best_params['n_estimators'])
+best_params['max_depth'] = int(best_params['max_depth'])
+best_params['num_leaves'] = int(best_params['num_leaves'])
+best_params['min_child_samples'] = int(best_params['min_child_samples'])
+best_params['scale_pos_weight'] = scale_pos_weight * best_params.pop('scale_pos_weight_mult')
 
-# Predict on the test set
-y_pred = best_model.predict(X_test)
+final_model = LGBMClassifier(**best_params, random_state=42)
+final_model.fit(X_train_scaled, y_train)
 
-# Calculate the F1 score
-f1_test = f1_score(y_test, y_pred)
-print(f"F1 Score on the test set: {f1_test:.4f}")
+# Evaluate the model on the test set
+y_pred = final_model.predict(X_test_scaled)
+test_f1 = f1_score(y_test, y_pred)
+print("Test F1 score:", test_f1)
+
+# Print optimization results
+for i, res in enumerate(optimizer.res):
+    print(f"Iteration {i+1}:")
+    print(f"F1 Score: {res['target']:.4f}")
+    print(f"Parameters: {res['params']}")
+    print()
